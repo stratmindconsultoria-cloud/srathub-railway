@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Tendência · Físico — {{ org_sigla }} · PMO</title>
+{% include "_style.html" %}
+<script src="{{ hub_base }}/static/chart.umd.min.js"></script>
+</head>
+<body>
+{% include "_nav.html" %}
+<div class="wrap">
+
+  <div class="card">
+    <h2>Insights — Físico</h2>
+    <ul class="insights">{% for i in insights %}<li>{{ i }}</li>{% endfor %}</ul>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h2>Avanço do portfólio através das rodadas</h2>
+      <p class="muted" style="margin-top:-8px;margin-bottom:14px">Cenário B: cada projeto é renormalizado pelo próprio Baseline de Dezembro, ponderado pelo Peso Físico Projeto — mesma metodologia da Curva S do painel principal.</p>
+      <div class="chart-box tall"><canvas id="f-curva"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="grid6" style="grid-template-columns:1fr">
+        <div class="kpi">
+          <div class="l">Real atual (% do Baseline Dez.)</div>
+          <div class="v">{{ "%.1f"|format(df.atual.real_pct) if df.atual.real_pct is not none else "—" }}%</div>
+          {% if df.anterior and df.anterior.real_pct is not none and df.atual.real_pct is not none %}
+            {% set d = df.atual.real_pct - df.anterior.real_pct %}
+            <div class="d {{ 'neg' if d<0 else 'pos' }}">{{ '%+.1f'|format(d) }} p.p. vs {{ rodada_comparada }}</div>
+          {% endif %}
+        </div>
+        <div class="kpi">
+          <div class="l">Baseline atual (planejado até o mês)</div>
+          <div class="v">{{ "%.1f"|format(df.atual.baseline_pct) if df.atual.baseline_pct is not none else "—" }}%</div>
+        </div>
+        <div class="kpi">
+          <div class="l">Projetos com Peso Físico &gt; 0</div>
+          <div class="v">{{ df.atual.n_com_peso }}</div>
+          {% if df.anterior %}
+            {% set dn = df.atual.n_com_peso - df.anterior.n_com_peso %}
+            {% if dn != 0 %}<div class="d {{ 'pos' if dn>0 else 'neg' }}">{{ '%+d'|format(dn) }} vs {{ rodada_comparada }}</div>{% endif %}
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Avanço por Unidade — rodada {{ rodada_atual }}</h2>
+    <table>
+      <tr><th>Unidade</th><th class="num">Baseline atual</th><th class="num">Real atual</th><th class="num">Δ p.p. vs {{ rodada_comparada or '—' }}</th><th class="num">Projetos c/ peso</th></tr>
+      {% for u in fu %}
+      <tr>
+        <td>{{ u.unidade }}</td>
+        <td class="num">{{ "%.1f%%"|format(u.baseline_pct) if u.baseline_pct is not none else "—" }}</td>
+        <td class="num"><strong>{{ "%.1f%%"|format(u.real_pct) if u.real_pct is not none else "—" }}</strong></td>
+        <td class="num {{ 'neg' if u.delta_pp and u.delta_pp<0 else ('pos' if u.delta_pp else '') }}">{{ '%+.1f p.p.'|format(u.delta_pp) if u.delta_pp is not none else "—" }}</td>
+        <td class="num">{{ u.n_com_peso }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+
+</div>
+
+<script>
+const CD = {{ chart_data_json|safe }};
+const teal = '{{ cor2 }}', muted = '#9CA3AF';
+new Chart(document.getElementById('f-curva'), {
+  type: 'line',
+  data: { labels: CD.labels, datasets: [
+    { label:'Baseline (%)', data: CD.baseline, borderColor: muted, borderDash:[6,4], pointRadius:4, tension:.25 },
+    { label:'Real (%)', data: CD.real, borderColor: teal, backgroundColor: teal+'22', fill:true, pointRadius:4, tension:.25, borderWidth:2.5 },
+  ]},
+  options: { responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{ position:'top' }, tooltip:{ callbacks:{ label: c => c.dataset.label+': '+c.raw.toFixed(1)+'%' } } },
+    scales:{ y:{ ticks:{ callback: v => v+'%' } } } }
+});
+</script>
+</body>
+</html>

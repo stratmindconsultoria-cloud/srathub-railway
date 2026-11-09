@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Configurar · {{NOME}}</title><link rel="stylesheet" href="/hub-static/hub.css"><link rel="icon" href="/hub-static/icone.svg"></head>
+<body><div class="centro"><div class="cx">
+  <div class="marca" id="marca"></div>
+  <p class="sub">Primeira execução: defina a senha de acesso</p>
+  <form id="f">
+    <h1>Configurar o hub</h1>
+    <div><label class="rot" for="nome">Nome do hub</label><input class="campo" id="nome" value="{{NOME}}" maxlength="40"></div>
+    <div><label class="rot" for="s1">Senha (mín. 8 caracteres)</label><input class="campo" id="s1" type="password" autocomplete="new-password" required minlength="8"></div>
+    <div><label class="rot" for="s2">Confirmar senha</label><input class="campo" id="s2" type="password" autocomplete="new-password" required></div>
+    <div id="erro" class="aviso err" hidden></div>
+    <button class="btn primario" id="b">Salvar e entrar</button>
+    <p style="font-size:11.5px;color:var(--text3)">Essa senha protege o portal e os apps, inclusive no acesso remoto. Ela fica guardada só nesta máquina (hash PBKDF2).</p>
+  </form>
+</div></div>
+<script src="/hub-static/marca.js"></script>
+<script>
+document.getElementById('f').onsubmit = async e => {
+  e.preventDefault(); const er = document.getElementById('erro'); er.hidden = true
+  const s1 = document.getElementById('s1').value, s2 = document.getElementById('s2').value
+  if (s1 !== s2) { er.textContent = 'As senhas não coincidem'; er.hidden = false; return }
+  const r = await fetch('/api/hub/configurar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ senha: s1, nome: document.getElementById('nome').value }) })
+  if (r.ok) { location.href = '/'; return }
+  const d = await r.json().catch(() => ({})); er.textContent = d.detail || 'Falha'; er.hidden = false
+}
+</script></body></html>

@@ -1,0 +1,52 @@
+{
+  "schema_version": "1.0",
+  "id": "stratagenda",
+  "name": "StratAgenda",
+  "version": "3.3.0",
+  "description": "Agenda executiva no servidor central: tarefas, blocos, time e sugestões do gestor — e a caixa de entrada do ecossistema (pendências das ferramentas e reuniões de projeto que viram ata na PMP).",
+  "runtime": {
+    "mode": "service",
+    "port": 8870,
+    "start_command": [
+      "python",
+      "-m",
+      "uvicorn",
+      "app:app",
+      "--host",
+      "127.0.0.1",
+      "--port",
+      "8870",
+      "--root-path",
+      "/apps/stratagenda"
+    ],
+    "health": {
+      "type": "http",
+      "path": "/health"
+    }
+  },
+  "portal": {
+    "default_visible": true,
+    "icon": "📅",
+    "category": "Agenda e rotina"
+  },
+  "auth_mode": "hub",
+  "dependencies": [
+    "hub_data_core"
+  ],
+  "strathub": {
+    "sempre_ligado": false,
+    "ocioso_min": 60
+  },
+  "contracts": {
+    "publishes": [
+      "pmp/ata_rascunho",
+      "agenda/compromisso"
+    ],
+    "consumes": [
+      "agenda/pendencia",
+      "agenda/ocupado",
+      "pmp/tap_aprovado",
+      "pmp/plano_aprovado"
+    ]
+  }
+}

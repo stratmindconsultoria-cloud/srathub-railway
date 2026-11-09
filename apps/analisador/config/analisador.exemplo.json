@@ -1,0 +1,5 @@
+{
+  "_comentario": "Copie para analisador.json. mapa_categorias: categoria usada na PMP → categoria de análise (postergado, antecipacao, cancelado, nao_orcado, poder, engenharia, contratacao, implantacao, reducao_escopo, economia, acrescimo_escopo, custo_adicional, migracao, outros).",
+  "mapa_categorias": {"Atraso de fornecedor": "contratacao", "Licenciamento": "poder"},
+  "rotulos": {}
+}

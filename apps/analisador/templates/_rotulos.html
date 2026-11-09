@@ -1,0 +1,8 @@
+<script>
+/* troca de termos exibidos conforme o perfil da organização (hub) */
+(function(){const MAP={{ rotulos_json|safe }};const ents=Object.entries(MAP).sort((a,b)=>b[0].length-a[0].length).map(([k,t])=>[new RegExp('(^|[^\\wÀ-ÿ])'+k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'(?![\\wÀ-ÿ])','g'),t]);
+if(!ents.length)return;const rot=t=>{let r=t;for(const[rx,s]of ents)r=r.replace(rx,(_,p)=>p+s);return r};
+const no=n=>{if(n.nodeType===3){const v=rot(n.nodeValue);if(v!==n.nodeValue)n.nodeValue=v;return}if(n.nodeType!==1||/^(SCRIPT|STYLE|TEXTAREA)$/.test(n.tagName))return;['title','placeholder'].forEach(a=>{const v=n.getAttribute(a);if(v){const r=rot(v);if(r!==v)n.setAttribute(a,r)}});n.childNodes.forEach(no)};
+const go=()=>{no(document.body);document.title=rot(document.title);if(window.Chart&&Chart.defaults){}};
+document.readyState==='loading'?document.addEventListener('DOMContentLoaded',go):go();window.addEventListener('load',go)})();
+</script>

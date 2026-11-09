@@ -1,0 +1,54 @@
+{
+  "schema_version": "1.0",
+  "id": "conector_microsoft",
+  "name": "Conector Microsoft",
+  "version": "1.3.0",
+  "description": "Microsoft 365 no ecossistema: agenda da StratAgenda ⇄ Outlook/Teams e aprovações nos dois sentidos (das ferramentas para o Teams e do Teams para a agenda) — a primeira resposta, em qualquer canal, vale.",
+  "runtime": {
+    "mode": "service",
+    "port": 8880,
+    "start_command": [
+      "python",
+      "-m",
+      "uvicorn",
+      "app:app",
+      "--host",
+      "127.0.0.1",
+      "--port",
+      "8880",
+      "--root-path",
+      "/apps/conector_microsoft"
+    ],
+    "health": {
+      "type": "http",
+      "path": "/health"
+    }
+  },
+  "portal": {
+    "default_visible": true,
+    "icon": "🟦",
+    "category": "Integrações"
+  },
+  "auth_mode": "hub",
+  "dependencies": [
+    "hub_data_core"
+  ],
+  "strathub": {
+    "sempre_ligado": false,
+    "ocioso_min": 60,
+    "agir_em_nome": true
+  },
+  "contracts": {
+    "publishes": [
+      "agenda/ocupado",
+      "agenda/pendencia",
+      "integracao/microsoft",
+      "notificacao/envio"
+    ],
+    "consumes": [
+      "agenda/compromisso",
+      "agenda/pendencia",
+      "notificacao/envio"
+    ]
+  }
+}

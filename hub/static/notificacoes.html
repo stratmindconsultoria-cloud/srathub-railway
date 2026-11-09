@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#1e3a6e"><title>Notificações · {{NOME}}</title>
+<link rel="stylesheet" href="/hub-static/hub.css"><link rel="icon" href="/hub-static/icone.svg">
+<style>.pref{width:100%;border-collapse:collapse;margin-top:8px}.pref th,.pref td{padding:8px 10px;border-bottom:1px solid var(--border,#e5e7eb);text-align:left;font-size:14px}
+.pref select{padding:5px 8px}.cx2{background:var(--surface,#fff);border:1px solid var(--border,#e5e7eb);border-radius:12px;padding:16px 18px;margin:14px 0}
+.mut2{color:var(--text2,#6b7280);font-size:13px}</style></head>
+<body>
+<header class="topo"><div class="topo-in">
+  <div><div class="marca" id="marca"></div><div class="sub">Notificações</div></div>
+  <div class="acoes"><a class="btn" href="/">⌂ Portal</a><button class="btn primario" id="bVer">🔔 Ver notificações</button></div>
+</div></header>
+<main style="max-width:860px">
+  <div class="cx2"><h2 style="margin:0 0 4px;font-size:18px">Como você quer ser avisado</h2>
+    <p class="mut2">Vale para todas as ferramentas. <b>Na hora</b>: chega assim que surge. <b>Resumo diário</b>: um aviso só, pela manhã, nos dias úteis. As notificações também ficam na agenda e no botão S·H de cada ferramenta, e o que você ler ou resolver em um lugar some dos outros.</p>
+    <div id="pref"><p class="mut2">Carregando…</p></div>
+    <div style="margin-top:12px"><button class="btn primario" id="bSalvar">Salvar preferências</button> <span class="mut2" id="msg"></span></div>
+  </div>
+</main>
+<script src="/hub-static/marca.js"></script>
+<script src="/hub-static/navhub.js" data-app="" data-nome="Portal" data-notif="1"></script>
+<script>
+const $ = s => document.querySelector(s), esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
+const ROT = { imediato: 'Na hora', resumo: 'Resumo diário', desligado: 'Não receber' }
+let P = null
+async function carregar() {
+  const r = await fetch('/api/hub/notificacoes/preferencias'); P = await r.json()
+  const disp = P.disponivel
+  $('#pref').innerHTML = `<table class="pref"><thead><tr><th>Tipo</th>${Object.entries(P.canais).map(([k, l]) => `<th>${esc(l)}${disp[k] ? '' : ' <span class="mut2">(ainda não configurado no hub)</span>'}</th>`).join('')}</tr></thead><tbody>
+    ${Object.entries(P.categorias).map(([c, l]) => `<tr><td>${esc(l)}${P.obrigatorias.includes(c) ? ' <span class="mut2">· obrigatória</span>' : ''}</td>${Object.keys(P.canais).map(ca =>
+      `<td><select data-c="${c}" data-ca="${ca}">${P.frequencias.filter(f => !(f === 'desligado' && P.obrigatorias.includes(c) && P.padrao[c][ca] !== 'desligado')).map(f => `<option value="${f}"${P.efetivas[c][ca] === f ? ' selected' : ''}>${ROT[f]}</option>`).join('')}</select></td>`).join('')}</tr>`).join('')}</tbody></table>
+    <p class="mut2" style="margin-top:8px">Resumo diário às ${esc(P.hora_resumo)}. ${disp.aprovacoes_teams ? 'Aprovações que chegam no app Aprovações do Teams já trazem o aviso da Microsoft (por e-mail e no Teams); por isso não repetimos.' : ''}</p>`
+}
+$('#bSalvar').onclick = async () => {
+  const cat = {}; document.querySelectorAll('[data-c]').forEach(s => { (cat[s.dataset.c] = cat[s.dataset.c] || {})[s.dataset.ca] = s.value })
+  const r = await fetch('/api/hub/notificacoes/preferencias', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ categorias: cat }) })
+  const d = await r.json(); $('#msg').textContent = r.ok ? 'Preferências salvas.' : (d.detail || 'Erro'); if (r.ok) carregar()
+}
+$('#bVer').onclick = () => window.STRATHUB && window.STRATHUB.abrirNotificacoes()
+carregar(); if (location.hash === '#ver') setTimeout(() => window.STRATHUB && window.STRATHUB.abrirNotificacoes(), 300)
+</script>
+</body></html>

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Tendência · {{ label_dim }} — {{ org_sigla }} · PMO</title>
+{% include "_style.html" %}
+<script src="{{ hub_base }}/static/chart.umd.min.js"></script>
+</head>
+<body>
+{% include "_nav.html" %}
+<div class="wrap">
+
+  <div class="card">
+    <h2>Insights — {{ label_dim }}</h2>
+    <ul class="insights">{% for i in insights %}<li>{{ i }}</li>{% endfor %}</ul>
+  </div>
+
+  <div class="card {{ 'result' if confronto.ok else 'result err' }}" style="border-left:4px solid {{ 'var(--green)' if confronto.ok else 'var(--red)' }}">
+    <h2>Confronto de consistência — meses fechados{% if confronto.mes_limite %} (até {{ confronto.mes_limite }}){% endif %}</h2>
+    <p class="muted">Realizado e Orçado de meses já fechados nas duas rodadas não deveriam mudar, PEP a PEP. Divergência aqui é sinal de revisão de dado passado — separado de projeto que só saiu/entrou da base.</p>
+    {% if confronto.aviso %}
+      <p class="muted">{{ confronto.aviso }}</p>
+    {% elif confronto.ok %}
+      <p><span class="flag ok">✓ Nenhuma divergência</span> entre {{ confronto.rodada_anterior }} e {{ confronto.rodada_atual }} nos meses fechados, pros PEPs presentes nas duas rodadas.</p>
+    {% else %}
+      <p><span class="flag">{{ confronto.n_divergencias }} divergência(s)</span> encontrada(s) — mostrando as maiores:</p>
+      <table>
+        <tr><th>PEP</th><th>Projeto</th><th>Mês</th><th>Campo</th><th class="num">{{ confronto.rodada_anterior }}</th><th class="num">{{ confronto.rodada_atual }}</th><th class="num">Δ</th></tr>
+        {% for d in confronto.divergencias[:15] %}
+        <tr>
+          <td><a class="pep-link" href="{{ hub_base }}/tendencia/pep/{{ d.pep }}">{{ d.pep }}</a></td>
+          <td class="muted">{{ d.projeto[:30] }}</td>
+          <td>{{ d.mes }}</td>
+          <td>{{ d.campo }}</td>
+          <td class="num">R$ {{ "%.2f"|format(d.valor_anterior/1e6) }} Mi</td>
+          <td class="num">R$ {{ "%.2f"|format(d.valor_atual/1e6) }} Mi</td>
+          <td class="num neg">{{ '%+.2f Mi'|format(d.delta/1e6) }}</td>
+        </tr>
+        {% endfor %}
+      </table>
+    {% endif %}
+    {% if confronto.efeito_escopo and (confronto.efeito_escopo.saidos or confronto.efeito_escopo.entraram) %}
+      <p class="muted" style="margin-top:10px">Efeito de escopo (não é divergência): {{ confronto.efeito_escopo.saidos|length }} projeto(s) saíram da base e {{ confronto.efeito_escopo.entraram|length }} entraram entre as duas rodadas — não entram no confronto acima.</p>
+    {% endif %}
+  </div>
+
+  {% if compromisso is defined %}
+  <div class="card">
+    <h2>Compromissos (Requisição/Pedido) — aba COMPROMISSO</h2>
+    <div class="grid3">
+      <div class="kpi">
+        <div class="l">Comp. Requisição do ano</div>
+        <div class="v">R$ {{ "%.1f"|format(compromisso.campos.comp_req_ano.atual/1e6) }} Mi</div>
+        {% if compromisso.campos.comp_req_ano.delta_abs is not none %}<div class="d {{ 'neg' if compromisso.campos.comp_req_ano.delta_abs<0 else 'pos' }}">{{ '%+.1f'|format(compromisso.campos.comp_req_ano.delta_abs/1e6) }} Mi</div>{% endif %}
+      </div>
+      <div class="kpi">
+        <div class="l">Comp. Pedido do ano</div>
+        <div class="v">R$ {{ "%.1f"|format(compromisso.campos.comp_ped_ano.atual/1e6) }} Mi</div>
+        {% if compromisso.campos.comp_ped_ano.delta_abs is not none %}<div class="d {{ 'neg' if compromisso.campos.comp_ped_ano.delta_abs<0 else 'pos' }}">{{ '%+.1f'|format(compromisso.campos.comp_ped_ano.delta_abs/1e6) }} Mi</div>{% endif %}
+      </div>
+      <div class="kpi">
+        <div class="l">% do Orçado já comprometido</div>
+        <div class="v">{{ "%.0f%%"|format(compromisso_pct) if compromisso_pct is not none else "—" }}</div>
+        <div class="d muted">Comp. Ped. ÷ Econ. Orç. (ano)</div>
+      </div>
+    </div>
+    <div class="grid3" style="margin-top:14px">
+      <div class="kpi"><div class="l">Sem Compromisso do ano</div><div class="v {{ 'neg' if compromisso.campos.comp_sem_ano.atual else '' }}">R$ {{ "%.1f"|format(compromisso.campos.comp_sem_ano.atual/1e6) }} Mi</div></div>
+      <div class="kpi"><div class="l">Projetos com Check divergente</div><div class="v {{ 'neg' if compromisso.n_check_divergente else '' }}">{{ compromisso.n_check_divergente }}</div></div>
+      <div class="kpi"><div class="l">Projetos com Previsão de Estouro</div><div class="v {{ 'neg' if compromisso.n_previsao_estouro else '' }}">{{ compromisso.n_previsao_estouro }}</div></div>
+    </div>
+    {% if sem_compromisso %}
+    <h2 style="margin-top:18px">Maiores valores sem compromisso lançado</h2>
+    <table>
+      <tr><th>PEP</th><th>Projeto</th><th>Unidade</th><th class="num">Valor</th></tr>
+      {% for s in sem_compromisso %}
+      <tr><td><a class="pep-link" href="{{ hub_base }}/tendencia/pep/{{ s.pep }}">{{ s.pep }}</a></td><td class="muted">{{ s.projeto[:35] }}</td><td class="muted">{{ s.unidade }}</td><td class="num neg">R$ {{ "%.2f"|format(s.valor/1e6) }} Mi</td></tr>
+      {% endfor %}
+    </table>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <div class="grid2">
+    <div class="card">
+      <h2>Evolução {{ label_dim }} através das rodadas</h2>
+      <div class="chart-box tall"><canvas id="d-evol"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="grid6" style="grid-template-columns:1fr">
+        {% for k, label in [(dimensao+"_orc_ano","Orçado do ano"), (dimensao+"_tend_ano","Tendência do ano"), (dimensao+"_real_acum","Realizado Acum.")] %}
+        {% set ind = dp.indicadores[k] %}
+        <div class="kpi">
+          <div class="l">{{ label }}</div>
+          <div class="v">R$ {{ "%.1f"|format(ind.atual/1e6) }} Mi</div>
+          {% if ind.delta_abs is not none %}
+            <div class="d {{ 'neg' if ind.delta_abs<0 else 'pos' }}">{{ '%+.1f'|format(ind.delta_abs/1e6) }} Mi ({{ '%+.1f'|format(ind.delta_pct) }}%)</div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Categorias de desvio através das rodadas</h2>
+    <div class="chart-box tall"><canvas id="d-cats"></canvas></div>
+  </div>
+
+  <div class="card">
+    <h2>Matriz de categorias — valor por rodada</h2>
+    <table>
+      <tr><th>Categoria</th>{% for c in cs %}<th class="num">{{ c.rodada }}</th>{% endfor %}<th class="num">Δ última rodada</th></tr>
+      {% for k in cats_ordenadas %}
+      <tr>
+        <td>{{ desvio_labels.get(k, k) }}</td>
+        {% for c in cs %}<td class="num {{ 'neg' if c.cats.get(k,0)<0 else '' }}">{{ "%.1f"|format(c.cats.get(k,0)/1e6) }}</td>{% endfor %}
+        {% set d = dp.desvios[dimensao][k].delta_abs %}
+        <td class="num {{ 'neg' if d and d<0 else ('pos' if d else '') }}">{{ '%+.1f'|format(d/1e6) if d is not none else "—" }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h2>Variação por Unidade</h2>
+      <table>
+        <tr><th>Unidade</th><th class="num">Δ</th><th class="num">Δ%</th></tr>
+        {% for u in du[:10] %}
+        <tr>
+          <td>{{ u.unidade }}</td>
+          <td class="num {{ 'neg' if u.delta_abs and u.delta_abs<0 else 'pos' }}">{{ '%+.1f Mi'|format(u.delta_abs/1e6) if u.delta_abs is not none else "—" }}</td>
+          <td class="num {{ 'neg' if u.delta_pct and u.delta_pct<0 else 'pos' }}">{{ '%+.1f%%'|format(u.delta_pct) if u.delta_pct is not none else "—" }}</td>
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+    <div class="card">
+      <h2>Maiores variações por projeto (total {{ label_dim }})</h2>
+      <table>
+        <tr><th>PEP</th><th>Projeto</th><th class="num">Δ</th></tr>
+        {% for p in top_peps[:10] %}
+        <tr>
+          <td><a class="pep-link" href="{{ hub_base }}/tendencia/pep/{{ p.pep }}">{{ p.pep }}</a></td>
+          <td class="muted">{{ p.projeto[:35] }}</td>
+          <td class="num {{ 'neg' if p.delta_abs<0 else 'pos' }}">{{ '%+.2f Mi'|format(p.delta_abs/1e6) }}</td>
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Maiores movimentos na categoria: {{ categoria_label }}</h2>
+    <p class="muted">Diferente da tabela acima — aqui é só a fatia da categoria selecionada no seletor do cabeçalho, não o desvio total do projeto.</p>
+    {% if top_peps_categoria %}
+    <table>
+      <tr><th>PEP</th><th>Projeto</th><th>Unidade</th><th class="num">Atual</th><th class="num">Δ</th></tr>
+      {% for p in top_peps_categoria %}
+      <tr>
+        <td><a class="pep-link" href="{{ hub_base }}/tendencia/pep/{{ p.pep }}">{{ p.pep }}</a></td>
+        <td class="muted">{{ p.projeto[:32] }}</td>
+        <td class="muted">{{ p.unidade }}</td>
+        <td class="num">{{ '%.2f Mi'|format(p.atual/1e6) }}</td>
+        <td class="num {{ 'neg' if p.delta_abs<0 else 'pos' }}">{{ '%+.2f Mi'|format(p.delta_abs/1e6) }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+    {% else %}<p class="muted">Sem movimento relevante nessa categoria entre as rodadas comparadas.</p>{% endif %}
+  </div>
+
+  <div class="card">
+    <h2>Recorrência — {{ categoria_label }} (2+ rodadas seguidas)</h2>
+    <p class="muted">Categoria com valor acumulado do ano em cada rodada, não evento pontual — tende a persistir até a causa ser resolvida. Ordenado pelo maior valor, limitado aos 15 maiores.</p>
+    {% if consecutivos %}
+    <table>
+      <tr><th>PEP</th><th>Projeto</th><th>Unidade</th><th class="num">Rodadas</th><th class="num">Valor atual</th></tr>
+      {% for p in consecutivos %}
+      <tr>
+        <td><a class="pep-link" href="{{ hub_base }}/tendencia/pep/{{ p.pep }}">{{ p.pep }}</a></td>
+        <td>{{ p.projeto[:40] }}</td>
+        <td class="muted">{{ p.unidade }}</td>
+        <td class="num"><span class="flag">{{ p.rodadas_consecutivas }}x</span></td>
+        <td class="num {{ 'neg' if p.valor_atual<0 else 'pos' }}">{{ '%.2f Mi'|format(p.valor_atual/1e6) }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+    {% else %}<p class="muted">Nenhum projeto com essa categoria em rodadas consecutivas.</p>{% endif %}
+  </div>
+
+</div>
+
+<script>
+const CD = {{ chart_data_json|safe }};
+const purple = '{{ cor1 }}', teal = '{{ cor2 }}', muted = '#9CA3AF';
+
+new Chart(document.getElementById('d-evol'), {
+  type: 'line',
+  data: { labels: CD.labels, datasets: [
+    { label:'Orçado do ano', data: CD.orc, borderColor: muted, borderDash:[6,4], pointRadius:3, tension:.25 },
+    { label:'Tendência do ano', data: CD.tend, borderColor: purple, backgroundColor: purple+'1f', fill:true, pointRadius:3, tension:.25, borderWidth:2.5 },
+    { label:'Realizado Acum.', data: CD.real, borderColor: teal, pointRadius:3, tension:.25, borderWidth:2 },
+  ]},
+  options: { responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{ position:'top', labels:{ boxWidth:12, font:{size:11} } },
+      tooltip:{ callbacks:{ label: c => c.dataset.label+': R$ '+(c.raw/1e6).toFixed(1)+' Mi' } } },
+    scales:{ y:{ ticks:{ callback: v => (v/1e6).toFixed(0)+'Mi' } } } }
+});
+
+const palette = ['{{ cor1 }}','{{ cor2 }}','#C0392B','#946200','#2C7FB8','#8E44AD','#16A085','#7F8C8D'];
+const catLabels = Object.keys(CD.cats_series);
+new Chart(document.getElementById('d-cats'), {
+  type: 'bar',
+  data: { labels: CD.cats_labels, datasets: catLabels.map((k,i) => ({
+    label: k, data: CD.cats_series[k], backgroundColor: palette[i % palette.length]
+  })) },
+  options: { responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{ position:'top', labels:{ boxWidth:12, font:{size:11} } },
+      tooltip:{ callbacks:{ label: c => c.dataset.label+': R$ '+(c.raw/1e6).toFixed(1)+' Mi' } } },
+    scales:{ x:{ stacked:true }, y:{ stacked:true, ticks:{ callback: v => (v/1e6).toFixed(0)+'Mi' } } } }
+});
+</script>
+</body>
+</html>

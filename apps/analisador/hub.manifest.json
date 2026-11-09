@@ -1,0 +1,46 @@
+{
+  "schema_version": "1.0",
+  "id": "analisador",
+  "name": "Analisador de Tendências",
+  "version": "4.1.2",
+  "description": "Análise comparativa entre rodadas de tendência da carteira: movimento (ponte), trajetória, exequibilidade e qualidade. Recebe as rodadas publicadas pela PMP sem planilha.",
+  "runtime": {
+    "mode": "service",
+    "port": 8840,
+    "start_command": [
+      "python",
+      "-m",
+      "uvicorn",
+      "app:app",
+      "--host",
+      "127.0.0.1",
+      "--port",
+      "8840",
+      "--root-path",
+      "/apps/analisador"
+    ],
+    "health": {
+      "type": "http",
+      "path": "/health"
+    }
+  },
+  "portal": {
+    "default_visible": true,
+    "icon": "📈",
+    "category": "Ciclo de vida do projeto"
+  },
+  "auth_mode": "hub",
+  "dependencies": [
+    "hub_data_core"
+  ],
+  "strathub": {
+    "ocioso_min": 60,
+    "sempre_ligado": false
+  },
+  "contracts": {
+    "publishes": [],
+    "consumes": [
+      "forecast/rodada"
+    ]
+  }
+}

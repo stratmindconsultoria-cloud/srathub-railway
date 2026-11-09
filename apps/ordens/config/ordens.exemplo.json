@@ -1,0 +1,89 @@
+{
+  "_comentario": "Copie para ordens.json para personalizar. Tudo é opcional: tipos de OS (com SLA em horas por prioridade e modelo de checklist), prefixo da numeração, limite de 'em risco' e rótulos de perfis.",
+  "prefixo": "OS",
+  "tipos": [
+    {
+      "codigo": "corretiva",
+      "nome": "Manutenção corretiva",
+      "sla_horas": {
+        "baixa": 120,
+        "media": 72,
+        "alta": 24,
+        "urgente": 4
+      },
+      "checklist": [
+        "Isolar e sinalizar a área",
+        "Diagnosticar a falha",
+        "Executar o reparo",
+        "Testar o funcionamento",
+        "Registrar fotos e limpar o local"
+      ]
+    },
+    {
+      "codigo": "preventiva",
+      "nome": "Manutenção preventiva",
+      "sla_horas": {
+        "baixa": 240,
+        "media": 168,
+        "alta": 72,
+        "urgente": 24
+      },
+      "checklist": [
+        "Conferir o plano de manutenção",
+        "Inspecionar componentes",
+        "Lubrificar / ajustar",
+        "Registrar medições"
+      ]
+    },
+    {
+      "codigo": "instalacao",
+      "nome": "Instalação",
+      "sla_horas": {
+        "baixa": 240,
+        "media": 120,
+        "alta": 48,
+        "urgente": 24
+      },
+      "checklist": [
+        "Conferir materiais",
+        "Instalar",
+        "Testar com o solicitante",
+        "Entregar documentação"
+      ]
+    },
+    {
+      "codigo": "inspecao",
+      "nome": "Inspeção",
+      "sla_horas": {
+        "baixa": 168,
+        "media": 72,
+        "alta": 24,
+        "urgente": 8
+      },
+      "checklist": [
+        "Inspecionar conforme roteiro",
+        "Registrar não conformidades"
+      ]
+    },
+    {
+      "codigo": "atendimento",
+      "nome": "Atendimento ao cliente",
+      "sla_horas": {
+        "baixa": 72,
+        "media": 48,
+        "alta": 24,
+        "urgente": 6
+      },
+      "checklist": [
+        "Contatar o cliente",
+        "Executar o atendimento",
+        "Obter o aceite do cliente"
+      ]
+    }
+  ],
+  "risco_sla_pct": 0.25,
+  "rotulos": {},
+  "perfis": {
+    "tecnico": "Técnico de campo"
+  }
+}

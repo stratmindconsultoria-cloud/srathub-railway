@@ -1,0 +1,145 @@
+{
+  "formato": "strathub-ecossistema/1",
+  "nome": "Ecossistema de Serviços",
+  "descricao": "Execução operacional: solicitações chegam do CRM (Conector CRM), viram ordens de serviço com SLA, equipe, materiais e custos; execuções aparecem na agenda; OS de projeto aparecem na PMP.",
+  "ferramentas": [
+    {
+      "id": "ordens",
+      "nome": "Ordens de Serviço",
+      "config": {
+        "ordens.json": {
+          "prefixo": "OS",
+          "risco_sla_pct": 0.25,
+          "tipos": [
+            {
+              "codigo": "corretiva",
+              "nome": "Manutenção corretiva",
+              "sla_horas": {
+                "baixa": 120,
+                "media": 72,
+                "alta": 24,
+                "urgente": 4
+              },
+              "checklist": [
+                "Isolar e sinalizar a área",
+                "Diagnosticar a falha",
+                "Executar o reparo",
+                "Testar o funcionamento",
+                "Registrar fotos e limpar o local"
+              ]
+            },
+            {
+              "codigo": "preventiva",
+              "nome": "Manutenção preventiva",
+              "sla_horas": {
+                "baixa": 240,
+                "media": 168,
+                "alta": 72,
+                "urgente": 24
+              },
+              "checklist": [
+                "Conferir o plano de manutenção",
+                "Inspecionar componentes",
+                "Lubrificar / ajustar",
+                "Registrar medições"
+              ]
+            },
+            {
+              "codigo": "instalacao",
+              "nome": "Instalação",
+              "sla_horas": {
+                "baixa": 240,
+                "media": 120,
+                "alta": 48,
+                "urgente": 24
+              },
+              "checklist": [
+                "Conferir materiais",
+                "Instalar",
+                "Testar com o solicitante",
+                "Entregar documentação"
+              ]
+            },
+            {
+              "codigo": "atendimento",
+              "nome": "Atendimento ao cliente",
+              "sla_horas": {
+                "baixa": 72,
+                "media": 48,
+                "alta": 24,
+                "urgente": 6
+              },
+              "checklist": [
+                "Contatar o cliente",
+                "Executar o atendimento",
+                "Obter o aceite do cliente"
+              ]
+            },
+            {
+              "codigo": "visita_tecnica",
+              "nome": "Visita técnica / orçamento",
+              "sla_horas": {
+                "baixa": 120,
+                "media": 72,
+                "alta": 48,
+                "urgente": 24
+              },
+              "checklist": [
+                "Agendar com o cliente",
+                "Levantar escopo e medidas",
+                "Registrar fotos",
+                "Enviar relatório"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "conector_crm",
+      "nome": "Conector CRM",
+      "config": {}
+    },
+    {
+      "id": "stratagenda",
+      "nome": "StratAgenda",
+      "config": {}
+    },
+    {
+      "id": "pmp",
+      "nome": "PMP · Carteira de Projetos",
+      "config": {}
+    }
+  ],
+  "ajustes_portal": {
+    "ordens": {
+      "oculto": false,
+      "ordem": 10,
+      "categoria": "Serviços"
+    },
+    "conector_crm": {
+      "oculto": false,
+      "ordem": 20,
+      "categoria": "Serviços"
+    },
+    "stratagenda": {
+      "oculto": false,
+      "ordem": 5,
+      "categoria": "Agenda e rotina"
+    },
+    "pmp": {
+      "oculto": false,
+      "ordem": 30,
+      "categoria": "Projetos (opcional)"
+    },
+    "originacao": {
+      "oculto": true
+    },
+    "plano": {
+      "oculto": true
+    },
+    "analisador": {
+      "oculto": true
+    }
+  }
+}

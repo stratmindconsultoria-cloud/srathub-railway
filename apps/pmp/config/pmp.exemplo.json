@@ -1,0 +1,50 @@
+{
+  "_comentario": "Copie para pmp.json para personalizar. Tudo é opcional.",
+  "categorias_desvio": {
+    "econ": [
+      "Postergação",
+      "Antecipação",
+      "Cancelamento",
+      "Redução de escopo",
+      "Economia",
+      "Acréscimo de escopo",
+      "Custo adicional",
+      "Não orçado",
+      "Migração entre projetos"
+    ],
+    "fin": [
+      "Postergação",
+      "Antecipação",
+      "Cancelamento",
+      "Redução de escopo",
+      "Economia",
+      "Acréscimo de escopo",
+      "Custo adicional",
+      "Não orçado",
+      "Migração entre projetos",
+      "Reajuste de índices"
+    ],
+    "fis": [
+      "Postergação",
+      "Antecipação",
+      "Cancelamento",
+      "Fatores externos / cliente",
+      "Desempenho de engenharia",
+      "Desempenho de contratação",
+      "Desempenho de implantação",
+      "Não orçado"
+    ]
+  },
+  "tolerancia": {
+    "econ": 1000,
+    "fin": 1000,
+    "fis": 0.5
+  },
+  "etapas": [
+    "Planejamento",
+    "Contratação",
+    "Execução",
+    "Comissionamento",
+    "Encerramento"
+  ]
+}

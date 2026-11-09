@@ -1,0 +1,17 @@
+{% if insights %}
+<div class="panel">
+  <h2>Achados</h2>
+  <div class="hint">Ordenados por severidade × materialidade. Cada achado traz a evidência e a pergunta que ele gera.</div>
+  {% for i in insights %}
+  <div class="insight {{ i.severidade }}">
+    <div class="head">
+      <span class="tit">{{ i.titulo }}</span>
+      <span class="mat">{{ i.tipo }}{% if i.materialidade %} · {{ i.materialidade | mi }}{% endif %}</span>
+    </div>
+    <div class="ev">{{ i.evidencia }}</div>
+    {% if i.pergunta %}<div class="perg"><b>Levar para a reunião:</b> {{ i.pergunta }}</div>{% endif %}
+    {% if i.link %}<div class="ev"><a href="{{ i.link }}">abrir o projeto →</a></div>{% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% endif %}

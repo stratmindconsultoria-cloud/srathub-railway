@@ -1,0 +1,53 @@
+{
+  "schema_version": "1.0",
+  "id": "pmp",
+  "name": "PMP · Carteira de Projetos",
+  "version": "1.2.2",
+  "description": "Gestão da carteira em execução: orçado × realizado × tendência (econômico, financeiro e físico), rodadas com classificação de desvios, mudanças, atas e ações. Recebe TAP e orçamento aprovado; publica as rodadas.",
+  "runtime": {
+    "mode": "service",
+    "port": 8830,
+    "start_command": [
+      "python",
+      "-m",
+      "uvicorn",
+      "app:app",
+      "--host",
+      "127.0.0.1",
+      "--port",
+      "8830",
+      "--root-path",
+      "/apps/pmp"
+    ],
+    "health": {
+      "type": "http",
+      "path": "/health"
+    }
+  },
+  "portal": {
+    "default_visible": true,
+    "icon": "🗂️",
+    "category": "Ciclo de vida do projeto"
+  },
+  "auth_mode": "hub",
+  "dependencies": [
+    "hub_data_core"
+  ],
+  "strathub": {
+    "ocioso_min": 60,
+    "sempre_ligado": false
+  },
+  "contracts": {
+    "publishes": [
+      "forecast/rodada",
+      "portfolio/execucao",
+      "agenda/pendencia"
+    ],
+    "consumes": [
+      "pmp/tap_aprovado",
+      "pmp/plano_aprovado",
+      "pmp/ata_rascunho",
+      "servicos/os_resumo"
+    ]
+  }
+}

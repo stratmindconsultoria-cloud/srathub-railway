@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Qualidade da rodada — {{ rodada_atual }}</title>
+{% include "_style2.html" %}
+</head>
+<body>
+{% include "_nav2.html" %}
+
+<div class="veredito {{ q.status }}">
+  <div class="eyebrow">Pergunta zero · {{ rodada_atual }}{% if q.rodada_anterior %} contra {{ q.rodada_anterior }}{% endif %}</div>
+  <div class="frase">Esta base está <b>{{ q.veredito }}</b>.</div>
+  <div class="sub">
+    <span>Bloqueios: <b>{{ q.n_erros }}</b></span>
+    <span>Ressalvas: <b>{{ q.n_alertas }}</b></span>
+    <span>Mês de análise: <b>{{ q.meta.mes_analise or '—' }}</b></span>
+    <span>Importada em: <b>{{ q.meta.data_import or '—' }}</b></span>
+    <span>Arquivo: <b>{{ q.meta.arquivo_nome or '—' }}</b></span>
+  </div>
+</div>
+
+<div class="panel">
+  <h2>Verificações da rodada</h2>
+  <div class="hint">Nenhum número desta ferramenta deveria ir para o comitê antes desta tela estar limpa. Um bloqueio aqui invalida as demais telas — não é ressalva de rodapé.</div>
+  {% for c in q.checks %}
+  <div class="check">
+    <span class="dot {{ c.status }}"></span>
+    <div style="flex:1">
+      <div class="nome">{{ c.nome }}
+        <span class="badge b-{{ c.status }}" style="margin-left:6px">{{ c.status }}</span>
+      </div>
+      <div class="det">{{ c.detalhe }}</div>
+      {% if c.peps %}
+      <details style="margin-top:5px">
+        <summary style="font-size:11.5px;color:var(--g1);cursor:pointer">ver projetos ({{ c.peps | length }})</summary>
+        <div style="font-size:11.5px;color:var(--desc);margin-top:5px;line-height:1.7">
+          {% for p in c.peps %}<a href="{{ hub_base }}/tendencia/pep/{{ p }}" style="margin-right:9px">{{ p }}</a>{% endfor %}
+        </div>
+      </details>
+      {% endif %}
+    </div>
+    {% if c.valor %}<div class="num" style="font-weight:700;white-space:nowrap">{{ c.valor | mi }}</div>{% endif %}
+  </div>
+  {% endfor %}
+</div>
+
+{% if confronto and confronto.divergencias %}
+<div class="panel">
+  <h2>Divergências em meses já fechados — {{ label_dim }}</h2>
+  <div class="hint">
+    Realizado e Orçado de meses até {{ confronto.mes_limite }} não deveriam mudar entre {{ q.rodada_anterior }} e {{ rodada_atual }}
+    para o mesmo PEP. Onde mudaram, ou a rodada anterior estava errada, ou a atual está.
+  </div>
+  <div class="tbl-wrap" style="max-height:420px">
+    <table>
+      <thead><tr><th>PEP</th><th>Projeto</th><th>Campo</th><th>Mês</th>
+        <th class="num">{{ q.rodada_anterior }}</th><th class="num">{{ rodada_atual }}</th><th class="num">Diferença</th></tr></thead>
+      <tbody>
+      {% for d in confronto.divergencias %}
+        <tr><td><a href="{{ hub_base }}/tendencia/pep/{{ d.pep }}">{{ d.pep }}</a></td>
+          <td>{{ (d.projeto or '')[:70] }}</td><td>{{ d.campo }}</td><td>{{ d.mes }}</td>
+          <td class="num">{{ d.valor_anterior | mi }}</td><td class="num">{{ d.valor_atual | mi }}</td>
+          <td class="num neg">{{ d.delta | mi }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<div class="panel">
+  <h2>Cobertura da rodada</h2>
+  <div class="hint">Quais Verticais Gestoras já entraram nesta rodada. As bases chegam segregadas, então uma rodada pode estar consolidada pela metade sem que nada na tela avise — este bloco é esse aviso.</div>
+  <table>
+    <thead><tr><th>Vertical Gestora</th><th>Situação</th></tr></thead>
+    <tbody>
+      {% for v in verticais_carregadas %}<tr><td>{{ v }}</td><td><span class="badge b-ok">carregada</span></td></tr>{% endfor %}
+      {% for v in verticais_faltando %}<tr><td>{{ v }}</td><td><span class="badge b-erro">ausente nesta rodada</span></td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% include "_insights.html" %}
+<div class="footer">/// {{ org_sigla|lower }} · análise comparativa de tendências</div>
+</body>
+</html>

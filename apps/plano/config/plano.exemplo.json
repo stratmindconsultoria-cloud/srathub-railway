@@ -1,0 +1,6 @@
+{
+  "_comentario": "Copie para plano.json para personalizar. Tudo é opcional.",
+  "categorias": ["Expansão", "Renovação de ativos", "Obrigatório / regulatório", "Segurança", "Tecnologia", "Eficiência"],
+  "rotulos": {},
+  "simulacoes_monte_carlo": 5000
+}

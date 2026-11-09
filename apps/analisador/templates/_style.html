@@ -1,0 +1,56 @@
+<style>
+  :root{
+    --purple1:{{ cor1 }}; --purple2:{{ cor1 }}cc; --teal:{{ cor2 }};
+    --bg:#F5F5FA; --card:#FFFFFF; --border:#E5E7EB; --text:#1F2430; --muted:#6B7280;
+    --red:#C0392B; --green:{{ cor2 }}; --amber:#946200;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text)}
+  .topbar{background:linear-gradient(120deg,var(--purple1),var(--purple2));padding:18px 32px;color:#fff}
+  .topbar-row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+  .topbar h1{margin:0;font-size:19px;font-weight:600}
+  .topbar a.back{color:#fff;opacity:.85;font-size:13px;text-decoration:none}
+  .tabs{display:flex;gap:4px;margin-top:14px}
+  .tabs a{color:#fff;opacity:.72;font-size:13px;font-weight:600;text-decoration:none;padding:8px 16px;border-radius:8px 8px 0 0}
+  .tabs a.active{opacity:1;background:var(--bg);color:var(--purple1)}
+  .toolbar{display:flex;align-items:center;gap:12px;font-size:13px;margin-top:10px}
+  .toolbar select{padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:#fff}
+  .filtro-dinamico{margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.2)}
+  .filtro-linha{display:flex;align-items:center;gap:10px;font-size:13px;color:#fff}
+  .filtro-linha select{padding:6px 10px;border-radius:6px;border:1px solid var(--border)}
+  .filtro-badge{background:rgba(255,255,255,.2);padding:3px 10px;border-radius:20px;font-size:12px}
+  .filtro-limpar{color:#fff;text-decoration:underline;font-size:12px}
+  .filtro-opcoes{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:10px;background:rgba(255,255,255,.1);padding:12px 14px;border-radius:10px;align-items:center;max-height:140px;overflow-y:auto}
+  .filtro-chk{color:#fff;font-size:12.5px;display:flex;align-items:center;gap:5px;white-space:nowrap}
+  #filtro-aplicar-btn{background:#fff;color:var(--purple1);border:none;padding:6px 14px;border-radius:6px;font-weight:700;font-size:12px;cursor:pointer;margin-left:auto}
+  .wrap{max-width:1220px;margin:24px auto;padding:0 20px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px;margin-bottom:20px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+  .card h2{margin:0 0 14px;font-size:15px;color:var(--purple1)}
+  .grid2{display:grid;grid-template-columns:1.3fr .7fr;gap:20px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .grid6{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  @media(max-width:900px){.grid2{grid-template-columns:1fr}.grid3,.grid6{grid-template-columns:1fr 1fr}}
+  .kpi{background:#FAFAFF;border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+  .kpi .l{font-size:12px;color:var(--muted);margin-bottom:4px}
+  .kpi .v{font-size:20px;font-weight:700}
+  .kpi .d{font-size:12px;margin-top:4px;font-weight:600}
+  .kpi canvas{margin-top:8px;max-height:52px}
+  .neg{color:var(--red)} .pos{color:var(--green)} .zero{color:var(--muted)}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border)}
+  th{color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase}
+  td.num{text-align:right;font-variant-numeric:tabular-nums}
+  a.pep-link{color:var(--purple1);text-decoration:none;font-weight:600}
+  a.pep-link:hover{text-decoration:underline}
+  .muted{color:var(--muted);font-size:13px}
+  .flag{display:inline-block;background:#FBEAE9;color:var(--red);font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px}
+  .flag.ok{background:#E6F4EF;color:var(--green)}
+  .empty{padding:50px;text-align:center;color:var(--muted)}
+  .insights{list-style:none;margin:0;padding:0}
+  .insights li{padding:10px 0 10px 30px;border-bottom:1px solid var(--border);position:relative;font-size:13.5px;line-height:1.5}
+  .insights li:last-child{border-bottom:none}
+  .insights li::before{content:"→";position:absolute;left:6px;color:var(--purple1);font-weight:700}
+  .chart-box{position:relative;height:230px}
+  .chart-box.tall{height:280px}
+</style>
+{% include "_rotulos.html" %}

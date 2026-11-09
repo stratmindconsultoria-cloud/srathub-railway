@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#1e3a6e"><title>Entrar · {{NOME}}</title><link rel="stylesheet" href="/hub-static/hub.css"><link rel="icon" href="/hub-static/icone.svg"></head>
+<body><div class="centro"><div class="cx">
+  <div class="marca" id="marca"></div>
+  <p class="sub">Portal das suas ferramentas</p>
+  <form id="f">
+    <h1>Entrar</h1>
+    <div><label class="rot" for="email">E-mail <span style="font-weight:400;opacity:.7">(vazio se você é o dono do hub)</span></label><input class="campo" id="email" type="email" autocomplete="username" autofocus></div>
+    <div><label class="rot" for="senha">Senha</label><input class="campo" id="senha" type="password" autocomplete="current-password" required></div>
+    <div id="erro" class="aviso err" hidden></div>
+    <button class="btn primario" id="b">Entrar</button>
+  </form>
+</div></div>
+<script src="/hub-static/marca.js"></script>
+<script>
+document.getElementById('f').onsubmit = async e => {
+  e.preventDefault(); const b = document.getElementById('b'); const er = document.getElementById('erro')
+  b.disabled = true; b.textContent = 'Entrando…'; er.hidden = true
+  const r = await fetch('/api/hub/entrar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: document.getElementById('email').value.trim(), senha: document.getElementById('senha').value }) })
+  if (r.ok) { const v = new URLSearchParams(location.search).get('volta'); location.href = v && v.startsWith('/') && !v.startsWith('//') ? v : '/'; return }
+  const d = await r.json().catch(() => ({})); er.textContent = d.detail || 'Falha ao entrar'; er.hidden = false; b.disabled = false; b.textContent = 'Entrar'
+}
+</script></body></html>

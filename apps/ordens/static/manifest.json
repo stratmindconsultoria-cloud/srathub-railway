@@ -1,0 +1,15 @@
+{
+  "name": "Ordens de Serviço — Execução",
+  "short_name": "Execução OS",
+  "description": "Modo execução das ordens de serviço: OS do dia, checklist com fotos e conclusão, mesmo sem sinal.",
+  "start_url": "campo.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F7F8FA",
+  "theme_color": "#1e3a6e",
+  "icons": [
+    {"src": "icone-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+    {"src": "icone-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ]
+}

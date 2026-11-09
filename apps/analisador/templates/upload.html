@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Analisador de Tendências — {{ org_sigla }} · PMO</title>
+<style>
+  :root{
+    --purple1:{{ cor1 }}; --purple2:{{ cor1 }}cc; --teal:{{ cor2 }};
+    --bg:#F5F5FA; --card:#FFFFFF; --border:#E5E7EB; --text:#1F2430; --muted:#6B7280;
+    --red:#C0392B; --green:{{ cor2 }};
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text)}
+  .topbar{
+    background:linear-gradient(120deg,var(--purple1),var(--purple2));
+    padding:22px 32px;color:#fff;
+    backdrop-filter:blur(8px);
+    box-shadow:0 2px 12px rgba(91,75,219,.25);
+  }
+  .topbar h1{margin:0;font-size:20px;font-weight:600}
+  .topbar p{margin:4px 0 0;font-size:13px;opacity:.85}
+  .wrap{max-width:960px;margin:28px auto;padding:0 20px}
+  .card{
+    background:var(--card);border:1px solid var(--border);border-radius:14px;
+    padding:24px;margin-bottom:20px;box-shadow:0 1px 3px rgba(0,0,0,.04);
+  }
+  .card h2{margin:0 0 14px;font-size:16px;color:var(--purple1)}
+  label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px;font-weight:600}
+  select,input[type=file]{
+    width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;
+    font-size:14px;background:#fafafa;margin-bottom:16px;
+  }
+  button{
+    background:linear-gradient(120deg,var(--purple1),var(--purple2));
+    color:#fff;border:none;padding:11px 22px;border-radius:8px;font-size:14px;
+    font-weight:600;cursor:pointer;
+  }
+  button:hover{opacity:.92}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--border)}
+  th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase}
+  .badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700}
+  .badge.ok{background:#E6F4EF;color:var(--green)}
+  .badge.err{background:#FBEAE9;color:var(--red)}
+  .result{border-left:4px solid var(--green)}
+  .result.err{border-left:4px solid var(--red)}
+  .kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:14px}
+  .kpi{background:#FAFAFF;border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+  .kpi .v{font-size:18px;font-weight:700}
+  .kpi .l{font-size:12px;color:var(--muted)}
+  .neg{color:var(--red)} .pos{color:var(--green)}
+  .warn{background:#FFF7E6;border:1px solid #F5D98B;border-radius:8px;padding:10px 14px;font-size:13px;margin-top:10px}
+  .muted{color:var(--muted);font-size:13px}
+  form.inline{display:inline}
+  .del{background:none;color:var(--red);font-size:12px;padding:2px 6px;text-decoration:underline;cursor:pointer;border:none}
+</style>
+{% include "_rotulos.html" %}
+</head>
+<body>
+  <div class="topbar">
+    <h1>Analisador de Tendências</h1>
+    <p>{{ org_nome }} · comparação entre rodadas de tendência da carteira (econômico, financeiro e físico)</p>
+    <p style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><a href="{{ hub_base }}/analise/movimento" style="color:{{ cor1 }};font-weight:700;text-decoration:none;background:#fff;padding:8px 16px;border-radius:8px">Análise comparativa entre rodadas →</a><a href="{{ hub_base }}/analise/qualidade" style="color:#fff;font-weight:600;text-decoration:none;background:rgba(255,255,255,.18);padding:8px 14px;border-radius:8px">Qualidade da rodada</a><a href="{{ hub_base }}/tendencia" style="color:#fff;font-weight:600;text-decoration:none;background:rgba(255,255,255,.18);padding:8px 14px;border-radius:8px">Visão por dimensão</a></p>
+  </div>
+
+  <div class="wrap">
+    {% if resultado %}
+    <div class="card result {{ 'err' if not resultado.ok }}">
+      {% if resultado.sincronizacao %}
+        <h2>{% if resultado.ok %}<span class="badge ok">Sincronizado</span>{% else %}<span class="badge err">Atenção</span>{% endif %}
+          {{ resultado.recebidas|length }} rodada(s) recebida(s) do hub</h2>
+        {% if resultado.recebidas %}<p class="muted">{{ resultado.recebidas|join(', ') }}</p>{% endif %}
+        {% if resultado.erro %}<div class="warn">{{ resultado.erro }}</div>{% endif %}
+      {% elif resultado.ok %}
+        <h2><span class="badge ok">Importado</span> Rodada {{ resultado.rodada }}{% if resultado.substituiu %} <span class="muted">(substituiu a versão anterior)</span>{% endif %}</h2>
+        <p class="muted">Mês de análise: <strong>{{ resultado.meta.mes_analise }}</strong> · Projetos: <strong>{{ resultado.meta.linhas_validas }}</strong> de {{ resultado.meta.linhas_lidas }}</p>
+        <div class="kpi-grid">
+          <div class="kpi"><div class="v">{{ "%.1f"|format(resultado.totais.econ_orc_ano/1e6) }} mi</div><div class="l">Econ. Orçado do ano</div></div>
+          <div class="kpi"><div class="v">{{ "%.1f"|format(resultado.totais.econ_tend_ano/1e6) }} mi</div><div class="l">Econ. Tendência do ano</div></div>
+          <div class="kpi"><div class="v">{{ "%.1f"|format(resultado.totais.fin_tend_ano/1e6) }} mi</div><div class="l">Fin. Tendência do ano</div></div>
+        </div>
+        {% for a in resultado.meta.avisos %}<div class="warn">{{ a }}</div>{% endfor %}
+      {% else %}
+        <h2><span class="badge err">Erro</span> Importação não realizada</h2><p class="muted">{{ resultado.erro }}</p>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    <div class="card">
+      <h2>Rodadas de tendência da PMP</h2>
+      {% if modo_hub %}
+        <p class="muted">⟳ Recebimento automático: toda rodada fechada na PMP entra aqui sozinha ({{ sync_ha }}{% if sync.ok == false %} · <span class="neg">falha: {{ sync.erro }}</span>{% endif %}).</p>
+        {% if rodada_aberta %}<div class="warn">A PMP está com <b>{{ rodada_aberta }}</b> em andamento. Ela aparece aqui assim que for fechada.</div>{% endif %}
+        {% if pendentes %}
+          <table><thead><tr><th>Rodada</th><th>Nome</th><th>Publicada em</th><th></th></tr></thead><tbody>
+          {% for p in pendentes %}<tr><td>{{ p.rodada }}</td><td>{{ p.nome }}</td><td>{{ (p.atualizado or '')[:16]|replace('T',' ') }}</td><td>{{ 'atualização' if p.ja_carregada else 'nova' }}</td></tr>{% endfor %}
+          </tbody></table>
+          <form method="post" action="{{ hub_base }}/sincronizar" style="margin-top:14px"><button>Receber agora</button></form>
+        {% else %}
+          <p class="muted">Tudo em dia com a PMP.</p>
+        {% endif %}
+        {% if pode_gerenciar %}
+        <details style="margin-top:16px;border:1px dashed var(--border);border-radius:10px;padding:10px 14px"><summary class="muted" style="cursor:pointer">Contingência: importar rodada por arquivo (JSON exportado da PMP)</summary>
+          <p class="muted">Use só se o hub estiver indisponível para a PMP. No fluxo normal a rodada chega sozinha.</p>
+          <form method="post" action="{{ hub_base }}/importar" enctype="multipart/form-data" style="margin-top:10px">
+            <input type="file" name="arquivo" id="arquivo" accept=".json,application/json" required>
+            <button type="submit">Importar arquivo</button>
+          </form>
+        </details>
+        {% endif %}
+      {% else %}
+        <p class="muted">Modo isolado (fora do hub): importe o arquivo JSON da rodada exportado pela PMP (Rodadas › JSON). No hub, as rodadas chegam automaticamente.</p>
+        <form method="post" action="{{ hub_base }}/importar" enctype="multipart/form-data" style="margin-top:16px">
+          <label for="arquivo">Arquivo da rodada (JSON da PMP)</label>
+          <input type="file" name="arquivo" id="arquivo" accept=".json,application/json" required>
+          <button type="submit">Importar arquivo</button>
+        </form>
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <h2>Rodadas carregadas</h2>
+      {% if rodadas %}
+      <table>
+        <thead><tr><th>Rodada</th><th>Mês de análise</th><th>Projetos</th><th>Origem</th><th>Importado em</th><th></th></tr></thead>
+        <tbody>
+        {% for r in rodadas %}
+          <tr><td><strong>{{ r.rodada }}</strong><br><span class="muted">{{ (r.versao_declarada or '').split('·')[-1] }}</span></td><td>{{ r.mes_analise or '—' }}</td><td>{{ r.linhas_validas }}</td>
+            <td>{{ r.arquivo_nome }}</td><td>{{ (r.data_import or '')[:16]|replace('T',' ') }}</td>
+            <td>{% if pode_gerenciar %}<form class="inline" method="post" action="{{ hub_base }}/rodadas/{{ r.rodada }}/excluir" onsubmit="return confirm('Excluir a rodada {{ r.rodada }}?')"><button class="del">excluir</button></form>{% endif %}</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+        <p class="muted">Nenhuma rodada carregada ainda.</p>
+      {% endif %}
+    </div>
+  </div>
+</body>
+</html>

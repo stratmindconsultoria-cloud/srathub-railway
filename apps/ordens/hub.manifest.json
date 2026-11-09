@@ -1,0 +1,52 @@
+{
+  "schema_version": "1.0",
+  "id": "ordens",
+  "name": "Ordens de Serviço",
+  "version": "1.1.2",
+  "description": "Execução operacional: OS a partir de modelos (checklist com fotos e respostas, SLA, composição), equipe com um executor, quadro das equipes arrastável, modo execução no celular (PWA, funciona sem sinal), aprovação do supervisor, feriados e custos só para a gestão.",
+  "runtime": {
+    "mode": "service",
+    "port": 8850,
+    "start_command": [
+      "python",
+      "-m",
+      "uvicorn",
+      "app:app",
+      "--host",
+      "127.0.0.1",
+      "--port",
+      "8850",
+      "--root-path",
+      "/apps/ordens"
+    ],
+    "health": {
+      "type": "http",
+      "path": "/health"
+    }
+  },
+  "portal": {
+    "default_visible": true,
+    "icon": "🛠️",
+    "category": "Serviços"
+  },
+  "auth_mode": "hub",
+  "dependencies": [
+    "hub_data_core"
+  ],
+  "strathub": {
+    "ocioso_min": 60,
+    "sempre_ligado": false
+  },
+  "contracts": {
+    "publishes": [
+      "servicos/os_resumo",
+      "servicos/status_os",
+      "agenda/pendencia"
+    ],
+    "consumes": [
+      "servicos/solicitacao_externa",
+      "pmp/tap_aprovado",
+      "pmp/plano_aprovado"
+    ]
+  }
+}

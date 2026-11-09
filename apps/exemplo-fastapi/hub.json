@@ -1,0 +1,10 @@
+{
+  "nome": "Exemplo FastAPI",
+  "descricao": "Modelo de app Python: sobe sob demanda, ambiente isolado (.venv) instalado automaticamente, WebSocket e formulário.",
+  "icone": "🐍",
+  "categoria": "Exemplos",
+  "tipo": "python",
+  "comando": "{python} -m uvicorn app:app --host 127.0.0.1 --port {port} --root-path {base_noslash}",
+  "health": "/health",
+  "ocioso_min": 15
+}

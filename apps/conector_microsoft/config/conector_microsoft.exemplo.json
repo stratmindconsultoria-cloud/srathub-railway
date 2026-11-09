@@ -1,0 +1,9 @@
+{
+  "_leia": "Opcional (implantação em massa). Copie para conector_microsoft.json. Depois, tudo pela tela Configuração.",
+  "tenant": "organizations",
+  "client_id": "00000000-0000-0000-0000-000000000000",
+  "calendario": true,
+  "aprovacoes": true,
+  "dias_calendario": 14,
+  "perfis": {"admin": "Administrador da integração", "usuario": "Usuário"}
+}

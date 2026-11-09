@@ -1,0 +1,88 @@
+  <div class="topbar">
+    <div class="topbar-row">
+      <h1>Análise Comparativa de Tendências — {{ org_sigla }} · PMO</h1>
+      <a class="back" href="{{ hub_base }}/">← rodadas</a>
+    </div>
+
+    <div class="tabs">
+      <a href="{{ hub_base }}/analise/movimento{{ qs_base }}" class="{{ 'active' if aba=='movimento' }}">
+        Movimento<span class="tab-sub">o que mudou e por quê</span></a>
+      <a href="{{ hub_base }}/analise/trajetoria{{ qs_base }}" class="{{ 'active' if aba=='trajetoria' }}">
+        Trajetória<span class="tab-sub">é padrão ou evento</span></a>
+      <a href="{{ hub_base }}/analise/exequibilidade{{ qs_base }}" class="{{ 'active' if aba=='exequibilidade' }}">
+        Exequibilidade<span class="tab-sub">a tendência é crível</span></a>
+      <a href="{{ hub_base }}/analise/qualidade{{ qs_base }}" class="{{ 'active' if aba=='qualidade' }}">
+        Qualidade<span class="tab-sub">posso confiar na base</span></a>
+    </div>
+
+    <form class="toolbar" method="get" id="form-analise">
+      <label>Rodada</label>
+      <select name="rodada" onchange="this.form.submit()">
+        {% for r in rodadas %}<option value="{{ r.rodada }}" {{ 'selected' if r.rodada==rodada_atual }}>{{ r.rodada }} ({{ r.status }})</option>{% endfor %}
+      </select>
+      <label>Comparar com</label>
+      <select name="comparar" onchange="this.form.submit()">
+        <option value="">rodada anterior (auto)</option>
+        {% for r in rodadas %}{% if r.rodada != rodada_atual %}<option value="{{ r.rodada }}" {{ 'selected' if r.rodada==rodada_comparada }}>{{ r.rodada }}</option>{% endif %}{% endfor %}
+      </select>
+
+      <span class="dim-toggle">
+        <a href="{{ hub_base }}/analise/{{ aba }}?rodada={{ rodada_atual }}&comparar={{ rodada_comparada or '' }}&dim=econ&corte={{ corte_mi }}{{ qs_filtro }}"
+           class="{{ 'active' if dim=='econ' }}">Econômico</a>
+        <a href="{{ hub_base }}/analise/{{ aba }}?rodada={{ rodada_atual }}&comparar={{ rodada_comparada or '' }}&dim=fin&corte={{ corte_mi }}{{ qs_filtro }}"
+           class="{{ 'active' if dim=='fin' }}">Financeiro</a>
+      </span>
+
+      <label title="Abaixo deste valor, o movimento é tratado como ruído e não aparece nas análises">Materialidade (Mi)</label>
+      <input type="number" name="corte" value="{{ corte_mi }}" step="0.1" min="0" style="width:80px"
+             onchange="this.form.submit()">
+      <input type="hidden" name="dim" value="{{ dim }}">
+      <input type="hidden" name="filtro_campo" id="filtro_campo_hidden" value="{{ filtro_campo }}">
+      <input type="hidden" name="filtro_valores" id="filtro_valores_hidden" value="{{ filtro_valores_raw }}">
+    </form>
+
+    <div class="filtro-dinamico">
+      <div class="filtro-linha">
+        <label style="color:rgba(255,255,255,.9);font-size:11px;font-weight:700;text-transform:uppercase">Filtrar/agrupar por</label>
+        <select id="filtro-dim-select" style="border:none;border-radius:8px;padding:6px 10px;font-size:13px;font-weight:600">
+          <option value="">— nenhum —</option>
+          {% for campo, label in filtro_campos.items() %}
+            <option value="{{ campo }}" {{ 'selected' if campo==filtro_campo }}>{{ label }}</option>
+          {% endfor %}
+        </select>
+        {% if filtro_ativo %}
+          <span class="filtro-badge">{{ filtro_selecionados|length }} de {{ filtro_campos.get(filtro_campo, filtro_campo) }}</span>
+          <a href="{{ hub_base }}/analise/{{ aba }}?rodada={{ rodada_atual }}&comparar={{ rodada_comparada or '' }}&dim={{ dim }}&corte={{ corte_mi }}">limpar filtro</a>
+        {% endif %}
+      </div>
+      {% if filtro_campo and filtro_opcoes %}
+      <div class="filtro-opcoes" id="filtro-opcoes-box">
+        {% for opcao in filtro_opcoes %}
+          <label class="filtro-chk"><input type="checkbox" value="{{ opcao }}" {{ 'checked' if opcao in filtro_selecionados }}> {{ opcao }}</label>
+        {% endfor %}
+        <button type="button" id="filtro-aplicar-btn">Aplicar</button>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      const form = document.getElementById('form-analise');
+      const dimSelect = document.getElementById('filtro-dim-select');
+      const campoHidden = document.getElementById('filtro_campo_hidden');
+      const valoresHidden = document.getElementById('filtro_valores_hidden');
+      if(dimSelect){
+        dimSelect.addEventListener('change', function(){
+          campoHidden.value = this.value; valoresHidden.value = ''; form.submit();
+        });
+      }
+      const btn = document.getElementById('filtro-aplicar-btn');
+      if(btn){
+        btn.addEventListener('click', function(){
+          const marcados = Array.from(document.querySelectorAll('#filtro-opcoes-box input[type=checkbox]:checked')).map(c=>c.value);
+          valoresHidden.value = marcados.join('|'); form.submit();
+        });
+      }
+    })();
+  </script>

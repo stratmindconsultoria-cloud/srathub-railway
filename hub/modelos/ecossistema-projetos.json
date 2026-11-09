@@ -1,0 +1,85 @@
+{
+  "formato": "strathub-ecossistema/1",
+  "nome": "Ecossistema de Projetos",
+  "descricao": "Ciclo de vida completo de projetos de investimento: originação → plano plurianual → carteira em execução (PMP) → análise de tendências, com a agenda como caixa de entrada.",
+  "ferramentas": [
+    {
+      "id": "originacao",
+      "nome": "Originação de Projetos",
+      "config": {}
+    },
+    {
+      "id": "plano",
+      "nome": "Plano de Investimentos",
+      "config": {}
+    },
+    {
+      "id": "pmp",
+      "nome": "PMP · Carteira de Projetos",
+      "config": {
+        "pmp.json": {
+          "campos_extras": [
+            {
+              "chave": "contrato",
+              "rotulo": "Contrato principal",
+              "tipo": "texto"
+            },
+            {
+              "chave": "risco",
+              "rotulo": "Risco do projeto",
+              "tipo": "lista",
+              "opcoes": [
+                "Baixo",
+                "Médio",
+                "Alto"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "analisador",
+      "nome": "Analisador de Tendências",
+      "config": {}
+    },
+    {
+      "id": "stratagenda",
+      "nome": "StratAgenda",
+      "config": {}
+    }
+  ],
+  "ajustes_portal": {
+    "originacao": {
+      "oculto": false,
+      "ordem": 10,
+      "categoria": "Ciclo de vida do projeto"
+    },
+    "plano": {
+      "oculto": false,
+      "ordem": 20,
+      "categoria": "Ciclo de vida do projeto"
+    },
+    "pmp": {
+      "oculto": false,
+      "ordem": 30,
+      "categoria": "Ciclo de vida do projeto"
+    },
+    "analisador": {
+      "oculto": false,
+      "ordem": 40,
+      "categoria": "Ciclo de vida do projeto"
+    },
+    "stratagenda": {
+      "oculto": false,
+      "ordem": 5,
+      "categoria": "Agenda e rotina"
+    },
+    "ordens": {
+      "oculto": true
+    },
+    "conector_crm": {
+      "oculto": true
+    }
+  }
+}

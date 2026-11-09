@@ -1,0 +1,50 @@
+{
+  "schema_version": "1.0",
+  "id": "originacao",
+  "name": "Originação de Projetos",
+  "version": "2.2.2",
+  "description": "Da demanda à elegibilidade (stage-gate), entrada no plano de investimentos e Termo de Abertura (TAP) com publicação automática na carteira de projetos.",
+  "runtime": {
+    "mode": "service",
+    "port": 8780,
+    "start_command": [
+      "python",
+      "-m",
+      "uvicorn",
+      "app:app",
+      "--host",
+      "127.0.0.1",
+      "--port",
+      "8780",
+      "--root-path",
+      "/apps/originacao"
+    ],
+    "health": {
+      "type": "http",
+      "path": "/health"
+    }
+  },
+  "portal": {
+    "default_visible": true,
+    "icon": "🌱",
+    "category": "Ciclo de vida do projeto"
+  },
+  "auth_mode": "hub",
+  "dependencies": [
+    "hub_data_core"
+  ],
+  "strathub": {
+    "ocioso_min": 60,
+    "sempre_ligado": false
+  },
+  "contracts": {
+    "publishes": [
+      "portfolio/entrada_originacao",
+      "pmp/tap_aprovado",
+      "agenda/pendencia"
+    ],
+    "consumes": [
+      "portfolio/retorno_originacao"
+    ]
+  }
+}

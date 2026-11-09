@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>{{ pep }} — Tendência</title>
+{% include "_style.html" %}
+<script src="{{ hub_base }}/static/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="topbar">
+    <div class="topbar-row">
+      <h1>{{ serie[-1].projeto }}</h1>
+      <a class="back" href="{{ hub_base }}/tendencia/financeiro">← voltar à tendência</a>
+    </div>
+  </div>
+  <div class="wrap">
+
+    <div class="card">
+      <p class="muted">PEP <strong>{{ pep }}</strong> · Unidade {{ serie[-1].unidade }} · Núcleo {{ serie[-1].nucleo }} · Vertical {{ serie[-1].vertical_gestora }}</p>
+      {% if rodadas_postergando >= 2 %}
+        <p><span class="flag">postergando há {{ rodadas_postergando }} rodadas seguidas</span></p>
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <h2>Fin. Orçado vs. Tendência do ano através das rodadas</h2>
+      <div class="chart-box"><canvas id="p-chart"></canvas></div>
+    </div>
+
+    <div class="card">
+      <h2>Histórico por rodada</h2>
+      <table>
+        <tr><th>Rodada</th><th class="num">Fin. Orç. ano</th><th class="num">Fin. Tend. ano</th><th class="num">Fin. Real Acum.</th><th>Maior desvio</th></tr>
+        {% for s in serie %}
+        <tr>
+          <td><strong>{{ s.rodada }}</strong></td>
+          <td class="num">R$ {{ "%.2f"|format(s.fin_orc_ano/1e6) }} Mi</td>
+          <td class="num">R$ {{ "%.2f"|format(s.fin_tend_ano/1e6) }} Mi</td>
+          <td class="num">R$ {{ "%.2f"|format(s.fin_real_acum/1e6) }} Mi</td>
+          <td>
+            {% if s.fin_desvios %}
+              {% set maior = s.fin_desvios.items()|list|sort(attribute='1', reverse=True)|first %}
+              {{ desvio_labels.get(maior[0], maior[0]) }}: R$ {{ "%.2f"|format(maior[1]/1e6) }} Mi
+            {% else %}<span class="muted">—</span>{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>Justificativas (mais recentes)</h2>
+      {% set last = serie[-1] %}
+      <p><strong>Financeiro:</strong> {{ last.fin_just_acum or last.fin_just_mes or "—" }}</p>
+      <p><strong>Físico:</strong> {{ last.fis_just_acum or last.fis_just_mes or "—" }}</p>
+    </div>
+
+  </div>
+<script>
+const CD = {{ chart_data_json|safe }};
+new Chart(document.getElementById('p-chart'), {
+  type: 'line',
+  data: { labels: CD.labels, datasets: [
+    { label:'Orçado do ano', data: CD.fin_orc, borderColor:'#9CA3AF', borderDash:[6,4], pointRadius:4, tension:.2 },
+    { label:'Tendência do ano', data: CD.fin_tend, borderColor:'{{ cor1 }}', backgroundColor:'{{ cor1 }}22', fill:true, pointRadius:4, tension:.2, borderWidth:2.5 },
+  ]},
+  options: { responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{ position:'top' }, tooltip:{ callbacks:{ label: c => c.dataset.label+': R$ '+(c.raw/1e6).toFixed(2)+' Mi' } } },
+    scales:{ y:{ ticks:{ callback: v => (v/1e6).toFixed(1)+'Mi' } } } }
+});
+</script>
+</body>
+</html>

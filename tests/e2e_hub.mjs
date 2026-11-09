@@ -1,0 +1,157 @@
+// Testes de ponta a ponta do STRAT·HUB (servidor real + navegador). Uso: node tests/e2e_hub.mjs
+import { createRequire } from 'node:module'
+import { spawn, execSync } from 'node:child_process'
+import fs from 'node:fs'
+import os from 'node:os'
+import path from 'node:path'
+const require = createRequire(import.meta.url)
+let pw; try { pw = require('playwright') } catch { pw = require('/opt/npm-tools/node_modules/playwright') }
+const { chromium, devices } = pw
+
+const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..')
+const TMP = fs.mkdtempSync(path.join(os.tmpdir(), 'strathub-'))
+const DATA = path.join(TMP, 'data'), APPS = path.join(TMP, 'apps'), SHOTS = path.join(ROOT, 'tests', 'screens')
+fs.mkdirSync(DATA, { recursive: true }); fs.mkdirSync(SHOTS, { recursive: true })
+fs.cpSync(path.join(ROOT, 'apps'), APPS, { recursive: true, filter: s => !s.includes('.venv') })
+const PORT = 8811, O = `http://localhost:${PORT}`
+fs.writeFileSync(path.join(DATA, 'hub.config.json'), JSON.stringify({ porta: PORT, porta_inicial_apps: 9300 }))
+const PY = process.platform === 'win32' ? path.join(ROOT, '.venv/Scripts/python.exe') : path.join(ROOT, '.venv/bin/python')
+const sleep = ms => new Promise(r => setTimeout(r, ms))
+let falhas = 0; const res = []
+const ok = (n, c, x = '') => { res.push({ n, ok: !!c, x }); if (!c) falhas++; console.log(`${c ? '✔' : '✘'} ${n}${x ? ' — ' + x : ''}`) }
+
+const srv = spawn(PY, ['-m', 'hub'], { cwd: ROOT, env: { ...process.env, STRATHUB_DATA: DATA, STRATHUB_APPS: APPS }, stdio: ['ignore', 'pipe', 'pipe'] })
+let srvLog = ''; srv.stdout.on('data', d => srvLog += d); srv.stderr.on('data', d => srvLog += d)
+for (let i = 0; i < 60; i++) { try { if ((await fetch(O + '/health')).ok) break } catch {} await sleep(250) }
+
+const browser = await chromium.launch()
+try {
+  console.log('\n── Primeira execução e login')
+  const ctx = await browser.newContext({ viewport: { width: 1360, height: 860 }, locale: 'pt-BR' })
+  const page = await ctx.newPage()
+  page.on('pageerror', e => console.log('   [pageerror]', e.message))
+  await page.goto(O + '/')
+  ok('primeira execução abre a configuração de senha', page.url().endsWith('/configurar'))
+  const remoto = await fetch(O + '/configurar', { headers: { 'X-Forwarded-For': '100.101.102.103' } })
+  ok('configuração bloqueada para acesso remoto', remoto.status === 403)
+  await page.fill('#s1', 'MinhaSenha#2026'); await page.fill('#s2', 'MinhaSenha#2026'); await page.click('#b')
+  await page.waitForURL(O + '/')
+  await page.locator('.card').first().waitFor()
+  ok('portal lista os 3 apps plugados', await page.locator('.card').count() === 3)
+  await page.screenshot({ path: `${SHOTS}/hub_01_portal_desktop.png` })
+  ok('configuração não pode ser refeita', (await fetch(O + '/api/hub/configurar', { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{"senha":"outra12345"}' })).status === 403)
+  await page.click('#bSair'); await page.waitForURL('**/entrar')
+  await page.fill('#senha', 'errada123'); await page.click('#b')
+  await page.locator('text=/senha incorret/i').waitFor()
+  ok('senha errada recusada', true)
+  await page.fill('#senha', 'MinhaSenha#2026'); await page.click('#b'); await page.waitForURL(O + '/')
+  ok('login com senha correta', true)
+  ok('API protegida sem sessão', (await fetch(O + '/api/hub/apps')).status === 401)
+  const anon = await browser.newContext(); const ap = await anon.newPage()
+  await ap.goto(O + '/apps/stratagenda/dashboard'); ok('app protegido redireciona para login do hub', ap.url().includes('/entrar?volta=/apps/stratagenda/dashboard'))
+  await anon.close()
+
+  console.log('\n── App estático (HTML único)')
+  await page.goto(O + '/apps/exemplo-html/')
+  ok('calculadora funciona', (await page.locator('#r').innerText()).includes('8h45'))
+
+  console.log('\n── StratAgenda no servidor central (SPA + API em subcaminho, identidade do hub)')
+  await page.goto(O + '/apps/stratagenda/')
+  await page.waitForURL(/\/apps\/stratagenda\/(dashboard|onboarding)/, { timeout: 300000 })
+  ok('StratAgenda: entra direto com a identidade do hub (sem senha própria)', true, page.url().replace(O, ''))
+  const sessAg = await page.evaluate(async () => (await fetch('/apps/stratagenda/api/session')).json())
+  ok('StratAgenda: sessão vem do servidor central', sessAg.modo === 'servidor' && sessAg.hub === true && sessAg.admin === true)
+  await page.screenshot({ path: `${SHOTS}/hub_02_stratagenda.png` })
+  await page.goto(O + '/apps/stratagenda/configuracoes?tab=sync'); await page.locator('text=Servidor e backup').first().waitFor()
+  ok('StratAgenda: link direto/recarregar em rota interna', true)
+  await page.locator('code', { hasText: '/apps/stratagenda/auth-callback' }).first().waitFor({ timeout: 15000 }).catch(() => {})
+  ok('StratAgenda: URI de retorno Microsoft com subcaminho (importação única do OneDrive)', await page.locator('code', { hasText: '/apps/stratagenda/auth-callback' }).count() === 1)
+
+  console.log('\n── App Python sob demanda (venv automático, proxy, WebSocket, redirect)')
+  const t0 = Date.now()
+  await page.goto(O + '/apps/exemplo-fastapi/')
+  ok('mostra página "iniciando" enquanto prepara', (await page.content()).includes('Iniciando'))
+  await page.screenshot({ path: `${SHOTS}/hub_03_iniciando.png` })
+  await page.locator('h2:has-text("Exemplo FastAPI")').waitFor({ timeout: 240000 })
+  ok('app iniciou sozinho (venv + pip + uvicorn)', true, `${Math.round((Date.now() - t0) / 1000)} s na 1ª vez`)
+  ok('venv isolado criado na pasta do app', fs.existsSync(path.join(APPS, 'exemplo-fastapi', '.venv')))
+  await page.locator('text=resposta: eco: olá pelo hub').waitFor({ timeout: 8000 })
+  ok('WebSocket atravessa o hub', true)
+  await page.fill('input[name=texto]', 'nota pelo hub'); await page.click('button:has-text("Adicionar")')
+  await page.waitForURL('**/apps/exemplo-fastapi/'); await page.locator('li:has-text("nota pelo hub")').waitFor()
+  ok('POST + redirect reescrito para o caminho do app', true)
+  await page.screenshot({ path: `${SHOTS}/hub_04_fastapi.png` })
+
+  console.log('\n── Portal: status, parar, logs')
+  await page.goto(O + '/')
+  const card = page.locator('.card[data-id="exemplo-fastapi"]')
+  await card.locator('.status.ativo').waitFor()
+  ok('portal mostra o app ativo com porta e memória', (await card.innerText()).includes('porta 93'))
+  await card.locator('[data-menu]').click(); await page.locator('.menu button:has-text("Ver log")').click()
+  await page.locator('#logtxt:has-text("pronto")').waitFor()
+  ok('log do app visível no portal', true)
+  await page.screenshot({ path: `${SHOTS}/hub_05_log.png` })
+  await page.click('#fecharLog')
+  await card.locator('[data-menu]').click(); await page.locator('.menu button:has-text("Parar")').click()
+  await card.locator('.status.parado').waitFor()
+  ok('parar pelo portal', true)
+  await page.goto(O + '/apps/exemplo-fastapi/')
+  await page.locator('h2:has-text("Exemplo FastAPI")').waitFor({ timeout: 30000 })
+  ok('reinicia sob demanda no próximo acesso (já sem instalar)', true)
+
+  console.log('\n── Plugar por .zip (portal) e por pasta')
+  const z = path.join(TMP, 'mini.zip'), zs = path.join(TMP, 'zsrc', 'mini-api')
+  fs.mkdirSync(zs, { recursive: true })
+  fs.writeFileSync(path.join(zs, 'hub.json'), JSON.stringify({ nome: 'Mini API', icone: '⚡', categoria: 'Testes', tipo: 'python', comando: '{python} -m uvicorn main:app --host 127.0.0.1 --port {port}', ocioso_min: 0.05 }))
+  fs.writeFileSync(path.join(zs, 'main.py'), `from fastapi import FastAPI, Request\nfrom fastapi.responses import JSONResponse\napp = FastAPI()\n@app.get('/')\ndef r(request: Request):\n    resp = JSONResponse({'cookie': request.headers.get('cookie', ''), 'prefix': request.headers.get('x-forwarded-prefix')})\n    resp.set_cookie('meu', '1', path='/')\n    return resp\n`)
+  execSync(`cd "${path.dirname(zs)}" && zip -qr "${z}" mini-api`)
+  await page.goto(O + '/'); await page.locator('.card').first().waitFor()
+  await page.click('#bPlugar'); await page.setInputFiles('#arq', z); await page.click('#enviar')
+  await page.locator('.aviso.ok').waitFor()
+  ok('zip plugado pelo portal', fs.existsSync(path.join(APPS, 'mini-api', 'hub.json')))
+  await page.screenshot({ path: `${SHOTS}/hub_06_plugar.png` })
+  await page.keyboard.press('Escape')
+  const sess = (await ctx.cookies()).map(c => `${c.name}=${c.value}`).join('; ')
+  const r = await page.request.get(O + '/apps/mini-api/', { headers: { cookie: sess + '; outro=x' } })
+  const body = await r.json(); if (!('cookie' in body)) console.log('   resposta mini-api:', r.status(), JSON.stringify(body))
+  ok('sessão do hub não é repassada ao app (outros cookies sim)', !body.cookie.includes('strathub_sessao') && body.cookie.includes('outro=x'), body.cookie)
+  ok('app recebe X-Forwarded-Prefix', body.prefix === '/apps/mini-api')
+  ok('cookie do app isolado no caminho dele', (r.headers()['set-cookie'] || '').includes('Path=/apps/mini-api/'))
+  // zip malicioso
+  const zm = path.join(TMP, 'mal.zip'); const zms = path.join(TMP, 'mal'); fs.mkdirSync(zms, { recursive: true })
+  execSync(`cd "${zms}" && python3 -c "import zipfile;z=zipfile.ZipFile('${zm}','w');z.writestr('hub.json','{\\"tipo\\":\\"static\\"}');z.writestr('../../fora.txt','x');z.close()"`)
+  const fd = new FormData(); fd.append('arquivo', new Blob([fs.readFileSync(zm)]), 'mal.zip')
+  const cookies = (await ctx.cookies()).map(c => `${c.name}=${c.value}`).join('; ')
+  const rm = await fetch(O + '/api/hub/plugar', { method: 'POST', body: fd, headers: { cookie: cookies } })
+  ok('zip com caminho malicioso recusado', rm.status === 400 && !fs.existsSync(path.join(TMP, 'fora.txt')))
+  // plugar copiando pasta
+  fs.cpSync(path.join(APPS, 'exemplo-html'), path.join(APPS, 'copia-html'), { recursive: true })
+  fs.writeFileSync(path.join(APPS, 'copia-html', 'hub.json'), JSON.stringify({ nome: 'Cópia por pasta', tipo: 'static', icone: '📁' }))
+  await page.locator('.card[data-id="copia-html"]').waitFor({ timeout: 12000 })
+  ok('pasta copiada para apps/ aparece sozinha no portal', true)
+  fs.writeFileSync(path.join(APPS, 'quebrado.json.txt'), 'x'); fs.mkdirSync(path.join(APPS, 'quebrado')); fs.writeFileSync(path.join(APPS, 'quebrado', 'hub.json'), '{ isto não é json')
+  await page.locator('.card[data-id="quebrado"] .erro-app').waitFor({ timeout: 12000 })
+  ok('manifesto inválido aparece com o erro (sem derrubar o hub)', true)
+
+  console.log('\n── Ociosidade')
+  let parado = false
+  for (let i = 0; i < 40 && !parado; i++) { await sleep(1000); const s = await (await page.request.get(O + '/api/hub/apps/mini-api/estado')).json(); parado = s.status === 'parado' }
+  ok('app ocioso é parado automaticamente', parado)
+
+  console.log('\n── Celular')
+  const mob = await browser.newContext({ ...devices['Pixel 7'] }); await mob.addCookies(await ctx.cookies())
+  const mp = await mob.newPage(); await mp.goto(O + '/'); await mp.locator('.card').first().waitFor()
+  await mp.screenshot({ path: `${SHOTS}/hub_07_portal_celular.png`, fullPage: true })
+  ok('portal responsivo no celular', true)
+  await mob.close(); await ctx.close()
+} catch (e) { falhas++; console.log('✘ ERRO', e.message.split('\n')[0]) }
+finally {
+  await browser.close()
+  srv.kill('SIGINT'); await sleep(2500)
+  const orfaos = execSync(`ps aux | grep -E 'uvicorn (app|main):app' | grep -F '${TMP}' | grep -v grep | wc -l`).toString().trim()
+  ok('ao encerrar o hub, nenhum processo de app fica para trás', orfaos === '0', `processos restantes: ${orfaos}`)
+  fs.writeFileSync(path.join(ROOT, 'tests', 'resultado_hub.json'), JSON.stringify({ quando: new Date().toISOString(), total: res.length, falhas, res }, null, 2))
+  console.log(`\n${res.length - falhas}/${res.length} verificações aprovadas`)
+  if (falhas) console.log('--- log do hub ---\n' + srvLog.slice(-1500))
+  process.exit(falhas ? 1 : 0)
+}

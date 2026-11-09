@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Movimento — {{ rodada_comparada or '' }} → {{ rodada_atual }}</title>
+<script src="{{ hub_base }}/static/chart.umd.min.js"></script>
+{% include "_style2.html" %}
+</head>
+<body>
+{% include "_nav2.html" %}
+
+<div class="veredito {{ vd.status }}">
+  <div class="eyebrow">{{ vd.titulo }}</div>
+  <div class="frase">{{ vd.frase }}</div>
+  <div class="sub">
+    <span>Base: <b>{{ vd.qualidade }}</b></span>
+    <span>Tendência: <b>{{ vd.exequibilidade }}</b></span>
+    {% if vd.get('pct_explicado') %}<span>Movimento explicado: <b>{{ '%.0f' | format(vd.get('pct_explicado')) }}%</b></span>{% endif %}
+    <span>Corte de materialidade: <b>{{ corte | mi }}</b></span>
+  </div>
+</div>
+
+{% if not ponte.disponivel %}
+  <div class="vazio">Esta é a primeira rodada carregada — não há par de comparação. Carregue outra rodada para ver a ponte e o catálogo de movimentos.</div>
+{% else %}
+
+<div class="kpis">
+  <div class="kpi {{ 'neg' if ponte.delta < 0 else 'pos' }}">
+    <div class="label">Δ Tendência {{ label_dim }}</div>
+    <div class="value">{{ ponte.delta | mi }}</div>
+    <div class="sub">{{ ponte.inicio | mi }} → {{ ponte.fim | mi }}{% if ponte.delta_pct is not none %} ({{ '%+.1f' | format(ponte.delta_pct) }}%){% endif %}</div>
+  </div>
+  <div class="kpi">
+    <div class="label">Já é fato</div>
+    <div class="value">{{ ponte.fato | mi }}</div>
+    <div class="sub">variação do realizado — irreversível</div>
+  </div>
+  <div class="kpi warn">
+    <div class="label">Ainda é previsão</div>
+    <div class="value">{{ ponte.previsao | mi }}</div>
+    <div class="sub">revisão de expectativa — ainda é decisão</div>
+  </div>
+  <div class="kpi {{ 'good' if ponte.pct_explicado > 85 else 'warn' }}">
+    <div class="label">Movimento explicado</div>
+    <div class="value">{{ '%.0f' | format(ponte.pct_explicado) }}%</div>
+    <div class="sub">residual não classificado: {{ ponte.residual | mi }}</div>
+  </div>
+  <div class="kpi">
+    <div class="label">Carteira que mexeu</div>
+    <div class="value">{{ '%.0f' | format(cat.pct_carteira_mexeu) }}%</div>
+    <div class="sub">{{ cat.n_peps }} projetos nas duas rodadas</div>
+  </div>
+</div>
+
+<div class="panel">
+  <h2>Ponte {{ rodada_comparada }} → {{ rodada_atual }} · Tendência {{ label_dim }}</h2>
+  <div class="hint">
+    Decomposição do delta até o fechamento aritmético. O residual aparece como "Não classificado" em vez de ser diluído —
+    se ele for grande, a classificação de desvios não está explicando o movimento.
+    {% if not ponte.plurianual %}<br><b>Sem base plurianual nesta comparação:</b> deslocamento para 2027+ aparece aqui como redução de carteira.{% endif %}
+  </div>
+  <canvas id="chartPonte" style="max-height:380px"></canvas>
+</div>
+
+<div class="panel">
+  <h2>Naturezas do movimento</h2>
+  <div class="hint">Quatro coisas diferentes que hoje ficariam somadas num delta só. Clique para filtrar o catálogo abaixo.</div>
+  <div class="chip-row">
+    <button class="chip active" data-tipo="">Todos <span class="n">({{ cat.movimentos | length }})</span></button>
+    {% for k, r in cat.resumo.items() %}{% if r.n %}
+      <button class="chip" data-tipo="{{ k }}">{{ tipos[k] }} <span class="n">({{ r.n }} · {{ r.valor | mi }})</span></button>
+    {% endif %}{% endfor %}
+  </div>
+
+  <div class="controls">
+    <input type="text" id="busca" placeholder="Buscar PEP, projeto, unidade, vertical...">
+    <select id="fJust">
+      <option value="">Justificativa: qualquer</option>
+      <option value="nao">Valor mudou e justificativa NÃO mudou</option>
+      <option value="sim">Justificativa atualizada</option>
+    </select>
+    <span style="font-size:12px;color:var(--muted)" id="contador"></span>
+  </div>
+
+  <div class="tbl-wrap">
+    <table id="tblMov">
+      <thead><tr>
+        <th>PEP</th><th>Projeto</th><th>Unidade</th><th>Natureza</th>
+        <th class="num">Tend. {{ rodada_comparada }}</th>
+        <th class="num">Tend. {{ rodada_atual }}</th>
+        <th class="num">Δ Ano</th>
+        <th class="num">Δ Quinquênio</th>
+        <th>Categoria dominante</th><th>Justificativa</th>
+      </tr></thead>
+      <tbody>
+      {% for m in cat.movimentos %}
+        <tr data-tipo="{{ m.tipo }}" data-just="{{ 'sim' if m.just_mudou else 'nao' }}"
+            data-busca="{{ (m.pep ~ ' ' ~ m.projeto ~ ' ' ~ (m.unidade or '') ~ ' ' ~ (m.vertical_gestora or '')) | lower }}">
+          <td><a href="{{ hub_base }}/tendencia/pep/{{ m.pep }}">{{ m.pep }}</a></td>
+          <td>{{ m.projeto }}</td>
+          <td>{{ m.unidade or '—' }}</td>
+          <td><span class="badge b-{{ m.tipo }}">{{ m.tipo_label.split(' (')[0] }}</span></td>
+          <td class="num">{{ m.tend_ant | mi }}</td>
+          <td class="num">{{ m.tend_atual | mi }}</td>
+          <td class="num {{ 'neg' if m.delta_ano < 0 else 'pos' }}">{{ m.delta_ano | mi }}</td>
+          <td class="num {{ 'neg' if m.delta_qq < 0 else 'pos' }}">{% if cat.plurianual %}{{ m.delta_qq | mi }}{% else %}—{% endif %}</td>
+          <td>{% if m.cat_dominante %}{{ desvio_labels.get(m.cat_dominante, m.cat_dominante) }}{% else %}—{% endif %}</td>
+          <td>{% if m.just_mudou %}<span class="badge b-ok">atualizada</span>{% else %}<span class="badge b-alerta">não mudou</span>{% endif %}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="legenda">
+    <b>Valor</b>: a carteira mudou de tamanho (o quinquênio mexeu). ·
+    <b>Calendário</b>: o ano mudou mas o quinquênio não — o dinheiro andou. ·
+    <b>Classificação</b>: mesmo valor, motivo diferente — movimento de narrativa. ·
+    <b>Entrada/Saída</b>: escopo entrou ou saiu da base.
+  </div>
+</div>
+
+{% include "_insights.html" %}
+
+<script>
+const P = {{ ponte_json | safe }};
+const CORES = {'Escopo':'#2563EB','Calendário':'#B45309','Performance':'#B91C1C','Custo':'{{ cor2 }}','Residual':'#94A3B8','Outros':'#64748B'};
+(function(){
+  const labels = ['{{ rodada_comparada }}'].concat(P.passos.map(p=>p.nome)).concat(['{{ rodada_atual }}']);
+  const dados = [[0, P.inicio]].concat(P.passos.map(p=>[p.de, p.para])).concat([[0, P.fim]]);
+  const cores = ['{{ cor1 }}'].concat(P.passos.map(p=>CORES[p.familia]||'#64748B')).concat(['{{ cor1 }}']);
+  new Chart(document.getElementById('chartPonte'), {
+    type:'bar',
+    data:{labels:labels, datasets:[{data:dados, backgroundColor:cores, borderRadius:4}]},
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false},
+        tooltip:{callbacks:{label:c=>{
+          const v = c.raw[1]-c.raw[0];
+          const p = P.passos[c.dataIndex-1];
+          const base = (v/1e6).toFixed(1).replace('.',',')+' Mi';
+          return p ? [base, p.n_peps+' projeto(s)'] : (c.raw[1]/1e6).toFixed(1).replace('.',',')+' Mi';
+        }}}},
+      scales:{y:{ticks:{callback:v=>(v/1e6).toFixed(0)+' Mi'}},
+              x:{ticks:{maxRotation:35, minRotation:0, font:{size:10}}}}
+    }
+  });
+
+  const linhas = Array.from(document.querySelectorAll('#tblMov tbody tr'));
+  const cont = document.getElementById('contador');
+  let fTipo='', fJust='', fBusca='';
+  function aplicar(){
+    let n=0;
+    linhas.forEach(tr=>{
+      const ok = (!fTipo || tr.dataset.tipo===fTipo)
+              && (!fJust || tr.dataset.just===fJust)
+              && (!fBusca || tr.dataset.busca.includes(fBusca));
+      tr.style.display = ok ? '' : 'none';
+      if(ok) n++;
+    });
+    cont.textContent = n + ' de ' + linhas.length + ' movimentos';
+  }
+  document.querySelectorAll('.chip').forEach(c=>c.addEventListener('click',()=>{
+    document.querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));
+    c.classList.add('active'); fTipo=c.dataset.tipo; aplicar();
+  }));
+  document.getElementById('fJust').addEventListener('change',e=>{fJust=e.target.value;aplicar();});
+  document.getElementById('busca').addEventListener('input',e=>{fBusca=e.target.value.toLowerCase();aplicar();});
+  aplicar();
+})();
+</script>
+{% endif %}
+<div class="footer">/// {{ org_sigla|lower }} · análise comparativa de tendências</div>
+</body>
+</html>

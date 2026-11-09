@@ -1,0 +1,8 @@
+{
+  "_comentario": "Copie para originacao.json e ajuste. Tudo é opcional; o que não for informado usa o padrão.",
+  "etapas": {"FSE": "Ficha de Demanda", "BC": "Business Case", "FSP": "Ficha de Projeto", "ELEG": "Elegibilidade", "MADURO": "Maduro"},
+  "rotulos": {"Business Case": "Estudo de Viabilidade"},
+  "eaps": {
+    "obras": {"nome": "EAP padrão · Obras / Implantação", "atividades": ["Estudos", "Projeto", "Contratação", "Execução", "Comissionamento", "Encerramento"]}
+  }
+}

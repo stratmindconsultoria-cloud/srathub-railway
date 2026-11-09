@@ -1,0 +1,1347 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Originação de Projetos</title>
+<style>
+:root{
+  --paper:#FBFAFD; --surface:#FFFFFF; --surface-2:#F7F3FB; --ink:#241A2E; --muted:#6C6175; --line:#E5DDED;
+  --petrol:#6B2C91; --petrol-deep:#4B1D69; --petrol-soft:#EEE4F5; --side-ink:#FFFFFF; --side-muted:#D9C8E6;
+  --signal:#C98A00; --signal-soft:#FBEFD2;
+  --ok:#2A7647; --ok-soft:#DCEFE3; --bad:#AE3832; --bad-soft:#F6E0DE; --neutral-soft:#E6ECEB;
+  --radius-s:4px; --radius-m:8px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#FBFAFD; --surface:#FFFFFF; --surface-2:#F7F3FB; --ink:#241A2E; --muted:#6C6175; --line:#E5DDED;
+    --petrol:#6B2C91; --petrol-deep:#4B1D69; --petrol-soft:#EEE4F5; --side-ink:#FFFFFF; --side-muted:#D9C8E6;
+    --signal:#EDB23C; --signal-soft:#3A2F12; --ok:#62BE88; --ok-soft:#173524; --bad:#E3766F; --bad-soft:#3E1D1B; --neutral-soft:#223639;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#FBFAFD; --surface:#FFFFFF; --surface-2:#F7F3FB; --ink:#241A2E; --muted:#6C6175; --line:#E5DDED;
+  --petrol:#6B2C91; --petrol-deep:#4B1D69; --petrol-soft:#EEE4F5; --side-ink:#FFFFFF; --side-muted:#D9C8E6;
+  --signal:#EDB23C; --signal-soft:#3A2F12; --ok:#62BE88; --ok-soft:#173524; --bad:#E3766F; --bad-soft:#3E1D1B; --neutral-soft:#223639;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--paper);color:var(--ink);font-family:"Archivo",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:15px;line-height:1.5;font-variant-numeric:tabular-nums}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--petrol)}
+:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+.app{display:grid;grid-template-columns:232px 1fr;min-height:100vh}
+aside{background:var(--petrol-deep);color:var(--side-ink);padding:22px 16px;display:flex;flex-direction:column;gap:22px;position:sticky;top:0;height:100vh}
+.brand{font-stretch:75%;font-weight:750;font-size:22px;line-height:1.05;letter-spacing:-.01em}
+.brand small{display:block;font-stretch:100%;font-weight:400;font-size:12.5px;color:var(--side-muted);margin-top:6px;letter-spacing:0}
+nav{display:flex;flex-direction:column;gap:2px}
+nav a{color:var(--side-ink);text-decoration:none;padding:8px 10px;border-radius:var(--radius-s);display:flex;justify-content:space-between;align-items:center}
+nav a:hover{background:rgba(255,255,255,.06)}
+nav a[aria-current="page"]{background:rgba(255,255,255,.12);font-weight:600}
+.count{background:var(--signal);color:#1d1600;border-radius:10px;font-size:12px;font-weight:700;padding:0 7px;min-width:20px;text-align:center}
+.who{margin-top:auto;border-top:1px solid rgba(255,255,255,.12);padding-top:14px;font-size:13px}
+.who label{color:var(--side-muted);display:block;margin-bottom:6px}
+.who select{width:100%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:var(--side-ink);border-radius:var(--radius-s);padding:7px}
+.who select option{color:#17272C}
+.who p{margin:8px 0 0;color:var(--side-muted);font-size:12px}
+.mode{font-size:12px;color:var(--side-muted)}
+.sync{margin-top:10px;padding:7px 9px;border-radius:8px;font-size:12px;display:flex;gap:6px;align-items:center;justify-content:space-between;background:rgba(255,255,255,.08)}
+.sync.bad{background:rgba(220,38,38,.25)}
+.sync button{font:inherit;font-size:11.5px;border:1px solid rgba(255,255,255,.35);background:transparent;color:inherit;border-radius:6px;padding:2px 7px;cursor:pointer}
+details.conting{margin-top:14px;border:1px dashed #d0d5dd;border-radius:10px;padding:10px 14px}
+details.conting summary{cursor:pointer;color:#667085;font-size:13px}
+.mode b{color:var(--side-ink);font-weight:600}
+main{padding:28px clamp(16px,3vw,40px) 60px;min-width:0}
+h1{font-stretch:80%;font-weight:750;font-size:34px;line-height:1.05;margin:0 0 6px;letter-spacing:-.015em}
+h2{font-stretch:85%;font-weight:700;font-size:20px;margin:0 0 12px}
+h3{font-weight:650;font-size:15px;margin:0 0 8px}
+.lede{color:var(--muted);margin:0 0 24px;max-width:70ch}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-m);padding:20px}
+.stack{display:flex;flex-direction:column;gap:20px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.spacer{flex:1}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:var(--radius-s);padding:7px 14px;cursor:pointer;font-weight:550}
+.btn:hover{border-color:var(--petrol)}
+.btn.primary{background:var(--petrol);border-color:var(--petrol);color:#fff}
+:root[data-theme="dark"] .btn.primary{color:#062224}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .btn.primary{color:#062224}}
+.btn.ok{background:var(--ok);border-color:var(--ok);color:#fff}
+.btn.bad{color:var(--bad);border-color:var(--bad)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.small{padding:3px 10px;font-size:13px}
+.filters{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px}
+.filters label{font-size:12px;color:var(--muted);display:flex;flex-direction:column;gap:3px}
+select,input[type=text],input[type=number],input[type=date],input[type=url],input[type=search],textarea{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-s);padding:7px 9px;min-width:0}
+textarea{resize:vertical;min-height:74px;width:100%}
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px 20px}
+.form .full{grid-column:1/-1}
+.field{display:flex;flex-direction:column;gap:4px}
+.field span{font-size:13px;color:var(--muted);font-weight:550}
+.field input,.field select,.field textarea{width:100%}
+.readonly{padding:7px 0;white-space:pre-wrap;min-height:36px;border-bottom:1px dashed var(--line)}
+.readonly.empty{color:var(--muted)}
+
+/* Linha de maturidade */
+.line-wrap{overflow-x:auto;padding:6px 0 2px}
+.mline{position:relative;display:grid;grid-template-columns:repeat(5,minmax(120px,1fr));min-width:640px}
+.mline::before{content:"";position:absolute;left:10%;right:10%;top:62px;height:6px;background:var(--petrol);border-radius:3px}
+.station{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;gap:0}
+.station .sname{font-stretch:80%;font-weight:700;font-size:17px;height:28px}
+.station .gate{font-size:11.5px;color:var(--muted);height:16px}
+.dotbox{height:52px;display:flex;align-items:center;justify-content:center;margin-top:-1px}
+.dot{border-radius:50%;background:var(--surface);border:5px solid var(--petrol);position:relative;z-index:1}
+.dot.term{box-shadow:0 0 0 4px var(--surface),0 0 0 7px var(--petrol)}
+.station .num{font-stretch:75%;font-weight:760;font-size:30px;line-height:1;margin-top:8px}
+.station .cap{font-size:13px;color:var(--muted)}
+.station .pend{font-size:12px;margin-top:4px;color:var(--signal);font-weight:600;min-height:18px}
+.station a{color:inherit;text-decoration:none}
+.station a:hover .sname{text-decoration:underline}
+
+.pline{display:grid;grid-template-columns:repeat(7,1fr);position:relative;margin:4px 0 8px}
+.pline::before{content:"";position:absolute;left:10%;right:10%;top:13px;height:4px;background:var(--line)}
+.pline .pfill{position:absolute;left:10%;top:13px;height:4px;background:var(--petrol)}
+.pst{display:flex;flex-direction:column;align-items:center;position:relative;z-index:1;font-size:11.5px;text-align:center}
+.pdot{width:30px;height:30px;border-radius:50%;border:4px solid var(--line);background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+.pst.done .pdot{border-color:var(--petrol);background:var(--petrol);color:#fff}
+.pst.cur .pdot{border-color:var(--petrol)}
+.pst.wait .pdot{border-color:var(--signal);background:var(--signal-soft)}
+.pst.back .pdot{border-color:var(--bad);background:var(--bad-soft)}
+.pst b{margin-top:4px;font-weight:650}
+.pst small{color:var(--muted)}
+
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));border:1px solid var(--line);border-radius:var(--radius-m);background:var(--surface)}
+.kpis.dual{border:0;background:transparent;gap:12px;grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
+.kpis.dual .kpi{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--petrol);border-radius:10px;box-shadow:0 3px 12px rgba(75,29,105,.06)}
+.project-layout{display:grid;grid-template-columns:180px minmax(0,1fr);gap:22px;align-items:start}
+.project-side{position:sticky;top:18px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px}
+.project-side a{display:block;padding:10px 12px;text-decoration:none;color:var(--ink);border-radius:7px}
+.project-side a:hover{background:var(--surface-2)}
+.project-side a[aria-current="page"]{background:var(--petrol-soft);color:var(--petrol);font-weight:700}
+.pst a{display:flex;flex-direction:column;align-items:center;color:inherit;text-decoration:none;width:100%}
+.pst a:hover b{color:var(--petrol)}
+.pst.locked{opacity:.45}
+.summary-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.summary-card{background:var(--surface);border:1px solid var(--line);border-top:3px solid var(--petrol);border-radius:10px;padding:14px}
+.summary-card .sv{font-size:24px;font-weight:750;margin-top:4px}
+.eap-grid{display:grid;grid-template-columns:minmax(220px,320px) 1fr;gap:16px;align-items:end}
+.activity-table input,.activity-table select{width:100%;min-width:110px}
+.activity-table td{vertical-align:middle}
+.activity-table .money{min-width:150px}
+.annual-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px}
+.annual-cell{background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:10px}
+.annual-cell b{display:block;font-size:16px;margin-top:3px}
+.next-action{border-left:4px solid var(--petrol);background:var(--petrol-soft)}
+@media(max-width:850px){.project-layout{grid-template-columns:1fr}.project-side{position:static;display:flex;overflow-x:auto}.project-side a{white-space:nowrap}.eap-grid{grid-template-columns:1fr}}
+.kpi{padding:14px 18px;border-right:1px solid var(--line)}
+.kpi:last-child{border-right:0}
+.kpi .v{font-stretch:75%;font-weight:760;font-size:28px;line-height:1.1}
+.kpi .l{font-size:13px;color:var(--muted)}
+.countdown{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;margin:0 0 22px;color:var(--muted)}
+.countdown b{color:var(--ink);font-weight:650}
+.bars{display:flex;flex-direction:column;gap:9px}
+.bar{display:grid;grid-template-columns:130px 1fr 96px;gap:10px;align-items:center;font-size:13.5px}
+.bar .track{height:12px;background:var(--neutral-soft);border-radius:2px;overflow:hidden}
+.bar .fillb{height:100%;background:var(--petrol)}
+.bar .val{text-align:right;color:var(--muted)}
+.stackbar{display:flex;height:16px;border-radius:2px;overflow:hidden;margin:6px 0 12px;background:var(--neutral-soft)}
+.legend{display:grid;grid-template-columns:auto 1fr auto auto;gap:6px 12px;font-size:13.5px;align-items:center}
+.sw{width:11px;height:11px;border-radius:2px}
+.c-eleg{background:var(--ok)} .c-mat{background:var(--petrol)} .c-risk{background:var(--signal)} .c-no{background:var(--bad)}
+
+.badge{display:inline-block;padding:1px 8px;border-radius:10px;font-size:12.5px;font-weight:600;white-space:nowrap}
+.b-eleg{background:var(--ok-soft);color:var(--ok)}
+.b-mat{background:var(--petrol-soft);color:var(--petrol)}
+.b-risk{background:var(--signal-soft);color:var(--signal)}
+.b-no{background:var(--bad-soft);color:var(--bad)}
+.b-neutral{background:var(--neutral-soft);color:var(--muted)}
+
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius-m);background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th{text-align:left;font-weight:600;color:var(--muted);font-size:12.5px;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap;background:var(--surface-2)}
+td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+tr.click{cursor:pointer}
+tr.click:hover td{background:var(--surface-2)}
+td.num,th.num{text-align:right;white-space:nowrap}
+.pid{font-size:12px;color:var(--muted)}
+.pname{font-weight:600}
+
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin:18px 0 20px;overflow-x:auto}
+.tabs a{padding:9px 14px;text-decoration:none;color:var(--muted);border-bottom:3px solid transparent;white-space:nowrap;font-weight:550}
+.tabs a[aria-current="page"]{color:var(--ink);border-color:var(--petrol)}
+.tabs a .mini{font-size:11px;margin-left:5px}
+.head{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;align-items:flex-start}
+.meta{color:var(--muted);font-size:13.5px}
+.back{font-size:13.5px;text-decoration:none;display:inline-block;margin-bottom:10px}
+.capgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(92px,1fr));gap:8px}
+.capgrid label{display:flex;flex-direction:column;font-size:12px;color:var(--muted);gap:3px}
+.capgrid input{width:100%;text-align:right}
+.capgrid .ro{border-bottom:1px dashed var(--line);padding:6px 2px;text-align:right;color:var(--ink);font-size:14px}
+.gatecard{display:grid;grid-template-columns:150px 1fr auto;gap:16px;padding:16px 0;border-bottom:1px solid var(--line);align-items:start}
+.gatecard:last-child{border-bottom:0}
+.gatecard .gname{font-stretch:80%;font-weight:720;font-size:18px}
+.note{background:var(--signal-soft);border-left:3px solid var(--signal);padding:10px 14px;border-radius:0 var(--radius-s) var(--radius-s) 0;font-size:14px;margin:0 0 16px}
+.note.info{background:var(--petrol-soft);border-color:var(--petrol)}
+.note.bad{background:var(--bad-soft);border-color:var(--bad)}
+.missing{margin:6px 0 0;padding-left:18px;font-size:13px;color:var(--bad)}
+.empty-state{padding:40px 24px;text-align:center}
+.empty-state p{color:var(--muted);max-width:56ch;margin:6px auto 16px}
+.toast{position:fixed;right:20px;bottom:20px;background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:var(--radius-s);font-size:14px;max-width:420px;z-index:50;opacity:0;transform:translateY(8px);transition:opacity .18s,transform .18s;pointer-events:none}
+.toast.show{opacity:1;transform:none}
+dialog{border:1px solid var(--line);border-radius:var(--radius-m);background:var(--surface);color:var(--ink);padding:22px;width:min(520px,92vw)}
+dialog::backdrop{background:rgba(8,20,22,.45)}
+.refresh{position:sticky;top:0;z-index:5}
+.hist td{font-size:13px}
+.hist .de{color:var(--muted);text-decoration:line-through}
+.muted{color:var(--muted)}
+.list-plain{list-style:none;padding:0;margin:0}
+.list-plain li{padding:9px 0;border-bottom:1px solid var(--line);display:flex;gap:10px;justify-content:space-between;align-items:baseline}
+.list-plain li:last-child{border-bottom:0}
+@media (max-width:820px){
+  .app{grid-template-columns:1fr}
+  aside{position:static;height:auto;flex-direction:row;flex-wrap:wrap;align-items:center;gap:12px;padding:14px}
+  nav{flex-direction:row;overflow-x:auto;width:100%}
+  .who{margin-top:0;border-top:0;padding-top:0;width:100%}
+  .gatecard{grid-template-columns:1fr}
+  .bar{grid-template-columns:100px 1fr 80px}
+  h1{font-size:28px}
+}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside>
+    <div class="brand">Originação de Projetos<small id="brandSub">PMO</small></div>
+    <nav id="nav"></nav>
+    <div class="who">
+      <label for="userSel">Entrando como</label>
+      <select id="userSel"></select>
+      <p id="userInfo"></p>
+      <p class="mode" id="modeInfo"></p>
+      <div id="syncBox" class="sync" hidden></div>
+    </div>
+  </aside>
+  <main id="main"><p class="muted">Conectando à base de projetos…</p></main>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<dialog id="dlg">
+  <form method="dialog" id="dlgForm">
+    <h2 id="dlgTitle"></h2>
+    <p id="dlgText" class="muted" style="margin-top:0"></p>
+    <textarea id="dlgInput" rows="4"></textarea>
+    <p id="dlgErr" style="color:var(--bad);font-size:13px;margin:6px 0 0;min-height:18px"></p>
+    <div class="row" style="justify-content:flex-end;margin-top:8px">
+      <button class="btn" value="cancel" type="button" id="dlgCancel">Cancelar</button>
+      <button class="btn primary" value="ok" type="submit" id="dlgOk">Confirmar</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+"use strict";
+/* ============ Configuração ============ */
+let USERS=[];   // carregados de /api/usuarios (hub: pessoas do hub + demonstração)
+const PERFIL={solicitante:'Solicitante',validador:'Engenharia / Analista',gestor:'Gestor da unidade',gerente_executivo:'Gerente Executivo',pmo:'Administrador PMO'};
+const UNIDADES=[];   // perfil da organização (hub ou config/organizacao.json)
+const DIRETORIAS=[];
+const STATUS=['Ativo','Suspenso','Cancelado'];
+const URG=['Baixa','Média','Alta','Crítica'];
+const MATS=['Elegível','Em maturação','Em risco','Não elegível'];
+const MAT_CLASS={'Elegível':'eleg','Em maturação':'mat','Em risco':'risk','Não elegível':'no'};
+const GATES=['FSE','BC','FSP','ELEG'];
+const ETAPA_NOME={FSE:'FSE',BC:'Business Case',FSP:'FSP',ELEG:'Elegibilidade',MADURO:'Maduro'};
+const IDX={FSE:0,BC:1,FSP:2,ELEG:3,MADURO:4};
+const GATE_APROVA={FSE:['validador','pmo'],BC:['gestor','pmo'],FSP:['validador','pmo'],ELEG:['pmo']};
+const GATE_CRIT={FSE:'Demanda válida e responsável definido',BC:'Solução preliminar e justificativa aprovadas',FSP:'Projeto tecnicamente estruturado',ELEG:'Maturidade suficiente para entrada no PQQ'};
+const REGRA={diasPorGate:45};
+const DOC_TIPOS=['FSE','Business Case','FSP','TAP','Estimativa','Cronograma','Estudo','Aprovação','Outro'];
+const CAMPOS={
+  FSE:[['fse.area','Área demandante','text'],['fse.urgencia','Urgência','sel:URG'],['fse.problema','Problema ou necessidade','area'],['fse.justificativa','Justificativa inicial','area']],
+  BC:[['nome','Nome oficial do projeto','text'],['bc.capexInicial','CAPEX inicial (R$)','num'],['bc.prazo','Prazo estimado (meses)','int'],['bc.objetivo','Objetivo do projeto','area'],['bc.escopo','Escopo preliminar','area'],['bc.alternativas','Alternativas avaliadas','area'],['bc.beneficios','Benefícios','area'],['bc.riscos','Riscos','area']],
+  FSP:[['fsp.escopo','Escopo consolidado','area'],['fsp.premissas','Premissas','area'],['fsp.riscos','Riscos','area'],['fsp.docTecnica','Documentação técnica de referência','area']],
+  ELEG:[]
+};
+const EAPS={
+  'obras':{nome:'EAP padrão · Obras / Implantação',atividades:['Estudos e levantamentos','Projeto básico','Projeto executivo','Licenciamento / autorizações','Contratação','Mobilização','Implantação / execução','Testes','Comissionamento','Encerramento']},
+  'sistemas':{nome:'EAP padrão · Sistemas / Tecnologia',atividades:['Levantamento de requisitos','Arquitetura e projeto','Contratação / aquisição','Desenvolvimento / configuração','Integração','Testes','Implantação','Treinamento','Estabilização','Encerramento']},
+  'equipamentos':{nome:'EAP padrão · Equipamentos / Ativos',atividades:['Especificação técnica','Engenharia','Contratação','Fabricação / aquisição','Inspeções','Entrega','Instalação','Testes','Comissionamento','Encerramento']}
+};
+const CRITICOS=['capexAno','bc.capexInicial','bc.escopo','fsp.escopo','bc.prazo','fsp.atividades','status','cicloId'];
+const REQ={
+  FSE:[['fse.problema','Problema ou necessidade'],['fse.justificativa','Justificativa inicial'],['responsavel','Responsável']],
+  BC:[['bc.objetivo','Objetivo'],['bc.escopo','Escopo preliminar'],['bc.beneficios','Benefícios'],['bc.capexInicial','CAPEX inicial'],['bc.prazo','Prazo estimado (meses)']],
+  FSP:[['fsp.escopo','Escopo consolidado'],['fsp.premissas','Premissas'],['@atividades','Cronograma físico-financeiro']],
+  ELEG:[['cicloId','Ciclo PQQ pretendido'],['@capexAno','Distribuição financeira gerada pela FSP']]
+};
+
+/* ============ Utilidades ============ */
+const $=s=>document.querySelector(s);
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const nowIso=()=>new Date().toISOString();
+const clone=o=>JSON.parse(JSON.stringify(o));
+const getP=(o,p)=>p.split('.').reduce((a,k)=>a==null?undefined:a[k],o);
+const setP=(o,p,v)=>{const ks=p.split('.');let a=o;ks.slice(0,-1).forEach(k=>{if(a[k]==null||typeof a[k]!=='object')a[k]={};a=a[k];});a[ks[ks.length-1]]=v;};
+const fmtMi=v=>{v=Number(v)||0;const a=Math.abs(v);if(a>=1e9)return 'R$ '+(v/1e9).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+' Bi';if(a>=1e6)return 'R$ '+(v/1e6).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+' Mi';if(a>=1e3)return 'R$ '+(v/1e3).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+' mil';return 'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0});};
+const fmtMil=v=>(v==null||v==='')?'':Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmtData=s=>{if(!s)return '—';const d=s.length===10?new Date(s+'T12:00:00'):new Date(s);return d.toLocaleDateString('pt-BR');};
+const fmtDH=s=>s?new Date(s).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'}):'—';
+const vazio=v=>v==null||String(v).trim()===''||(typeof v==='number'&&isNaN(v));
+function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('show'),3200);}
+function opts(list,sel,blank){return (blank!=null?`<option value="">${esc(blank)}</option>`:'')+list.map(o=>{const v=typeof o==='string'?o:o.v,l=typeof o==='string'?o:o.l;return `<option value="${esc(v)}"${String(v)===String(sel??'')?' selected':''}>${esc(l)}</option>`;}).join('');}
+const LISTAS={UNIDADES,DIRETORIAS,STATUS,URG};
+
+/* ============ Estado e persistência ============ */
+const S={api:true,mode:'carregando',projetos:new Map(),ciclos:new Map(),queues:new Map(),assinatura:'',
+  filtros:{unidade:'',diretoria:'',estagio:'',ciclo:'',status:''},busca:'',editing:false,pending:false};
+const UKEY='originacao:usuario';
+let USER={id:'',nome:'',perfil:'solicitante',unidade:null};
+function carregarUsuarioSalvo(){const lista=USERS.filter(u=>u.origem!=='hub');try{const u=localStorage.getItem(UKEY);const f=lista.find(x=>x.id===u);USER=f||lista.find(x=>x.perfil==='pmo')||lista[0]||USER;}catch(e){}}
+
+function appBase(){const p=location.pathname;const m=p.match(/^(\/apps\/[^/]+)/);return m?m[1]:'';}
+function appUrl(url){return appBase()+(url.startsWith('/')?url:'/'+url);}
+/* ============ Organização, vocabulário e sessão ============ */
+let META=null,SESSAO=null,ROT=[];
+const V=k=>((META&&META.organizacao&&META.organizacao.vocabulario)||{})[k]||k;
+const _escRx=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+function prepararRotulos(map){ROT=Object.entries(map||{}).filter(([k,t])=>k&&t&&k!==t).sort((a,b)=>b[0].length-a[0].length).map(([k,t])=>[new RegExp('(^|[^\\wÀ-ÿ])'+_escRx(k)+'(?![\\wÀ-ÿ])','g'),t]);}
+function rotularTexto(t){if(!t||!ROT.length)return t;let r=String(t);for(const [rx,s] of ROT)r=r.replace(rx,(_,p)=>p+s);return r;}
+const _rotVistos=new WeakMap();
+function rotularNo(n){
+  if(n.nodeType===3){if(_rotVistos.get(n)===n.nodeValue)return;const v=rotularTexto(n.nodeValue);if(v!==n.nodeValue)n.nodeValue=v;_rotVistos.set(n,n.nodeValue);return;}
+  if(n.nodeType!==1||n.tagName==='SCRIPT'||n.tagName==='STYLE'||n.tagName==='TEXTAREA'||n.isContentEditable)return;
+  for(const a of ['placeholder','title','aria-label']){const v=n.getAttribute(a);if(v){const r=rotularTexto(v);if(r!==v)n.setAttribute(a,r);}}
+  n.childNodes.forEach(rotularNo);
+}
+function ativarRotulos(){
+  rotularNo(document.body);document.title=rotularTexto(document.title);
+  new MutationObserver(ms=>{for(const x of ms){if(x.type==='characterData')rotularNo(x.target);else x.addedNodes.forEach(rotularNo);}}).observe(document.body,{childList:true,subtree:true,characterData:true});
+  const _c=window.confirm.bind(window),_p=window.prompt.bind(window),_a=window.alert.bind(window);
+  window.confirm=m=>_c(rotularTexto(m));window.prompt=(m,d)=>_p(rotularTexto(m),d);window.alert=m=>_a(rotularTexto(m));
+}
+function _mix(hex,alvo,p){const h=hex.replace('#','');const c=[0,2,4].map(i=>parseInt(h.slice(i,i+2),16));const t=alvo==='w'?255:0;return '#'+c.map(v=>Math.round(v+(t-v)*p).toString(16).padStart(2,'0')).join('');}
+function aplicarMeta(meta){
+  META=meta;const o=meta.organizacao||{};
+  UNIDADES.splice(0,UNIDADES.length,...(o.unidades||[]).map(u=>u.nome||u.codigo));
+  DIRETORIAS.splice(0,DIRETORIAS.length,...(o.areas||[]));
+  if(meta.eaps){Object.keys(EAPS).forEach(k=>delete EAPS[k]);Object.assign(EAPS,meta.eaps);}
+  if(meta.etapas)Object.assign(ETAPA_NOME,meta.etapas);
+  const cor=/^#[0-9a-f]{6}$/i.test(o.cor_primaria||'')?o.cor_primaria:null;
+  if(cor){const r=document.documentElement.style;r.setProperty('--petrol',cor);r.setProperty('--petrol-deep',_mix(cor,'b',.35));r.setProperty('--petrol-soft',_mix(cor,'w',.88));r.setProperty('--side-muted',_mix(cor,'w',.7));}
+  $('#brandSub').textContent=(o.sigla||o.nome||'')+' · '+V('pmo');
+  prepararRotulos(meta.rotulos);
+}
+async function carregarSessao(){
+  SESSAO=await api('GET','/api/sessao');
+  if(SESSAO.modo==='hub')USER=SESSAO.usuario||SESSAO.real;
+}
+async function api(method,url,body,isForm){
+  const headers=USER&&USER.id?{'X-Usuario':USER.id}:{};
+  if(body!==undefined&&!isForm)headers['Content-Type']='application/json';
+  const r=await fetch(appUrl(url),{method,headers,body:body===undefined?undefined:(isForm?body:JSON.stringify(body))});
+  let data=null;try{data=await r.json();}catch(e){}
+  if(!r.ok){
+    const det=data&&data.detail;
+    const e=new Error(typeof det==='string'?det:(det&&det.mensagem)||('Erro '+r.status+' no servidor'));
+    e.status=r.status;e.data=det;throw e;
+  }
+  return data;
+}
+async function carregar(){
+  const [ps,cs,est]=await Promise.all([api('GET','/api/projetos'),api('GET','/api/ciclos'),api('GET','/api/estado')]);
+  S.projetos=new Map(ps.map(p=>[p.id,p]));S.ciclos=new Map(cs.map(c=>[c.id,c]));S.assinatura=est.assinatura;
+}
+function enqueue(key,fn){const prev=S.queues.get(key)||Promise.resolve();const next=prev.catch(()=>{}).then(fn);S.queues.set(key,next);return next;}
+async function writeDoc(col,obj){
+  return enqueue(col+'/'+obj.id,async()=>{
+    const saved=await api('PUT','/api/'+col+'/'+encodeURIComponent(obj.id),obj);
+    (col==='projetos'?S.projetos:S.ciclos).set(saved.id,saved);
+    return saved;
+  });
+}
+async function salvarProjeto(p,msg){
+  try{await writeDoc('projetos',p);if(msg)toast(msg);}
+  catch(e){
+    if(e.status===409){if(e.data&&e.data.atual)S.projetos.set(p.id,e.data.atual);S.editing=false;toast('Outra pessoa alterou este projeto antes de você. Os dados foram recarregados; refaça a alteração.');}
+    else toast('Não foi possível salvar: '+e.message);
+  }
+}
+function onData(){
+  if(S.editing){S.pending=true;const b=$('#refreshNote');if(b)b.hidden=false;return;}
+  render();
+}
+async function verificarAtualizacoes(){
+  if(document.hidden||$('#dlg').open)return;
+  try{const est=await api('GET','/api/estado');if(est.assinatura!==S.assinatura){await carregar();onData();}}
+  catch(e){$('#modeInfo').innerHTML='<b>Sem conexão com o servidor local</b>';}
+}
+
+/* ============ Fluxo automático (hub) ============ */
+let SYNC=null;
+const haQuanto=t=>{if(!t)return 'nunca';const s=Math.max(0,Date.now()/1000-t);return s<60?'agora há pouco':s<3600?'há '+Math.round(s/60)+' min':'há '+Math.round(s/3600)+' h';};
+function desenharSync(){const b=$('#syncBox');if(!b||!SYNC||!(META&&META.modo==='hub'))return;b.hidden=false;b.className='sync '+(SYNC.ok===false?'bad':'ok');
+  b.innerHTML=`<span>${SYNC.ok===false?'⚠ Falha na integração':'⟳ Sincronizado '+haQuanto(SYNC.ultimo)}</span><button type="button" id="syncBtn" title="${esc(SYNC.erro||'Recebe agora o que as outras ferramentas publicaram')}">Sincronizar</button>`;
+  $('#syncBtn').onclick=()=>sincronizarAgora(true);}
+async function sincronizarAgora(manual){
+  try{SYNC=await api(manual!==undefined?'POST':'GET',manual!==undefined?'/api/sync/agora':'/api/sync/status');}catch(e){SYNC={...(SYNC||{}),ok:false,erro:e.message};}
+  desenharSync();
+  const r=(SYNC&&SYNC.resultado)||{};
+  if(manual)toast(SYNC.ok===false?'Falha: '+(SYNC.erro||''):(r.retornos_do_plano||r.taps_publicados)?`Recebidos ${r.retornos_do_plano||0} retorno(s); ${r.taps_publicados||0} TAP publicado(s).`:'Tudo em dia.');
+  if(r.retornos_do_plano||r.taps_publicados){await carregar();onData();}
+}
+
+/* ============ Regras de negócio ============ */
+const isPMO=u=>u.perfil==='pmo';
+function podeVer(p,u){
+  if(u.perfil==='pmo'||u.perfil==='validador'||u.perfil==='gerente_executivo')return true;
+  if(u.perfil==='gestor')return p.unidade===u.unidade;
+  return p.solicitanteId===u.id||p.unidade===u.unidade;
+}
+function podeEditar(p,u){
+  if(isPMO(u))return true;
+  if(p.status==='Cancelado')return false;
+  return (u.perfil==='solicitante'&&p.solicitanteId===u.id)||(u.perfil==='validador'&&p.solicitanteId!==u.id);
+}
+function podeCriar(u){return u.perfil==='solicitante'||isPMO(u);}
+function podeAprovar(p,g,u){
+  if(!GATE_APROVA[g].includes(u.perfil))return false;
+  if(u.perfil==='gestor'&&p.unidade!==u.unidade)return false;
+  return true;
+}
+function secaoLiberada(p,sec){return sec==='resumo'||IDX[p.estagio]>=IDX[sec];}
+function podeEditarSecao(p,u,sec){
+  if(!podeEditar(p,u)||!secaoLiberada(p,sec))return false;
+  if(['BC','FSP'].includes(sec)&&(u.perfil!=='validador'&&u.perfil!=='pmo'||p.solicitanteId===u.id))return false;
+  if(isPMO(u))return true;
+  if(u.perfil==='validador')return p.gates[sec].status!=='em_validacao';
+  if(sec==='resumo')return !(p.gates[p.estagio]&&p.gates[p.estagio].status==='em_validacao');
+  return p.gates[sec].status!=='em_validacao';
+}
+const capexAnoTotal=p=>Object.values(p.capexAno||{}).reduce((a,b)=>a+(Number(b)||0),0);
+const capexTotal=p=>((p.pqq||{}).retorno||{}).status==='aprovado'?Number(p.pqq.retorno.orcamento_total)||0:(capexAnoTotal(p)||Number(p.capexEstimado)||0);
+function anos(){
+  const y=new Date().getFullYear();let max=y+6;
+  S.ciclos.forEach(c=>{if(c.fim>max)max=c.fim;});
+  S.projetos.forEach(p=>Object.keys(p.capexAno||{}).forEach(k=>{if(+k>max)max=+k;}));
+  const a=[];for(let i=y;i<=Math.min(max,y+15);i++)a.push(i);return a;
+}
+function ciclosOrdenados(){return [...S.ciclos.values()].sort((a,b)=>a.corte.localeCompare(b.corte));}
+const fimCorte=c=>new Date(c.corte+'T23:59:59');
+function proximoCiclo(){const t=new Date();return ciclosOrdenados().find(c=>fimCorte(c)>=t)||null;}
+function cicloDo(p){return (p.cicloId&&S.ciclos.get(p.cicloId))||null;}
+const diasAte=c=>Math.floor((fimCorte(c)-new Date())/864e5);
+function maturidade(p){
+  if(p.status==='Cancelado')return 'Não elegível';
+  if(p.maturidadeManual)return p.maturidadeManual;
+  if(p.gates.ELEG.status==='aprovado')return 'Elegível';
+  const c=cicloDo(p);if(!c)return 'Em maturação';
+  const dias=diasAte(c);if(dias<0)return 'Não elegível';
+  const need=(4-IDX[p.estagio])*REGRA.diasPorGate;
+  let r=dias>=need*1.3?'Em maturação':dias>=need*0.7?'Em risco':'Não elegível';
+  if(r==='Em maturação'&&GATES.some(g=>p.gates[g].status==='devolvido'))r='Em risco';
+  return r;
+}
+function situacao(p){
+  if(p.status!=='Ativo')return p.status;
+  const q=p.pqq||{}, t=p.tap||{}, m=p.pmp||{};
+  if(m.status==='publicado'||m.status==='recebido')return 'Na PMP';
+  if(t.status==='aprovado')return 'TAP aprovada · aguardando PMP';
+  if(t.status==='em_aprovacao')return 'Aguardando aprovação da TAP';
+  if(t.status==='em_analise_engenharia')return 'Em análise da Engenharia · TAP';
+  if(t.status==='devolvido')return 'TAP devolvida para ajuste';
+  if(q.status==='aprovado'||(q.retorno||{}).status==='aprovado')return 'PQQ aprovado · aguardando Engenharia';
+  if(q.status==='em_analise')return 'Em análise no PQQ';
+  if(q.status==='enviado')return 'Aguardando aprovação PQQ';
+  if(q.status==='publicando')return 'Publicando no PQQ';
+  if(q.status==='liberado_para_envio')return 'Liberado para envio ao PQQ';
+  if(q.status==='em_aprovacao_envio')return 'Aguardando aprovação do Gerente Executivo';
+  if(q.status==='devolvido_para_ajuste')return 'Devolvido para ajuste';
+  if(p.estagio==='MADURO')return 'Elegível · aguardando fluxo PQQ';
+  return {rascunho:'Em elaboração',em_validacao:'Em validação',devolvido:'Devolvido para ajuste',aprovado:'Aprovado'}[p.gates[p.estagio].status];
+}
+function faltando(p,g){
+  return REQ[g].filter(([f])=>f==='@capexAno'?capexAnoTotal(p)<=0:f==='@atividades'?!(p.fsp&&p.fsp.atividades&&p.fsp.atividades.length):vazio(getP(p,f))).map(x=>x[1]);
+}
+function rotulo(campo){
+  if(campo.startsWith('capexAno.'))return 'CAPEX '+campo.split('.')[1];if(campo==='fsp.atividades')return 'Cronograma físico-financeiro';
+  for(const k in CAMPOS){const f=CAMPOS[k].find(x=>x[0]===campo);if(f)return (k==='resumo'?'':ETAPA_NOME[k]+' · ')+f[1];}
+  return {estagio:'Estágio',maturidadeManual:'Maturidade (manual)',caminho:'Caminho de saída'}[campo]||campo;
+}
+function addHist(p,e){(p.hist=p.hist||[]).push(Object.assign({em:nowIso(),por:USER.nome,perfil:PERFIL[USER.perfil]},e));}
+function visiveis(){return [...S.projetos.values()].filter(p=>podeVer(p,USER));}
+function filtrados(){
+  const f=S.filtros,b=S.busca.trim().toLowerCase();
+  return visiveis().filter(p=>(!f.unidade||p.unidade===f.unidade)&&(!f.diretoria||p.diretoria===f.diretoria)&&(!f.estagio||p.estagio===f.estagio)
+    &&(!f.ciclo||(cicloDo(p)||{}).id===f.ciclo)&&(!f.status||situacao(p)===f.status)
+    &&(!b||(p.nome+' '+p.id+' '+(p.pep||'')+' '+(p.responsavel||'')).toLowerCase().includes(b)));
+}
+function fila(){
+  const out=[];
+  visiveis().forEach(p=>{
+    if(p.status!=='Ativo')return;
+    GATES.forEach(g=>{
+      const s=p.gates[g];
+      if(s.status==='em_validacao'&&podeAprovar(p,g,USER))out.push({p,tipo:'Validar Gate '+ETAPA_NOME[g],aba:'validacoes'});
+      if(s.status==='devolvido'&&podeEditar(p,USER)&&!isPMO(USER))out.push({p,tipo:'Ajustar '+ETAPA_NOME[g]+' devolvido',aba:g});
+    });
+    if(p.caminho==='extraordinario'&&p.extra&&p.extra.status==='solicitado'&&(isPMO(USER)||(USER.perfil==='gestor'&&USER.unidade===p.unidade)))
+      out.push({p,tipo:'Decidir rota extraordinária',aba:'validacoes'});
+    const pp=p.pqq||{}, tap=p.tap||{};
+    if(pp.status==='em_aprovacao_envio'&&(USER.perfil==='gerente_executivo'||isPMO(USER)))out.push({p,tipo:'Aprovar envio ao PQQ',aba:'fluxo'});
+    if(pp.retorno&&pp.retorno.status==='aprovado'&&['em_analise_engenharia','devolvido'].includes(tap.status)&&(USER.perfil==='validador'||isPMO(USER)))out.push({p,tipo:'Revisar escopo e cronograma do TAP',aba:'fluxo'});
+    if(tap.status==='em_aprovacao'&&(USER.perfil==='gerente_executivo'||isPMO(USER)))out.push({p,tipo:'Aprovar TAP',aba:'fluxo'});
+  });
+  return out;
+}
+
+/* ============ Diálogo ============ */
+function pedirTexto(titulo,texto,obrigatorio=true){
+  return new Promise(res=>{
+    const d=$('#dlg');$('#dlgTitle').textContent=titulo;$('#dlgText').textContent=texto;$('#dlgInput').value='';$('#dlgErr').textContent='';
+    const done=v=>{d.close();cleanup();res(v);};
+    const onSubmit=ev=>{ev.preventDefault();const v=$('#dlgInput').value.trim();if(obrigatorio&&!v){$('#dlgErr').textContent='Escreva um comentário para continuar.';return;}done(v||'');};
+    const onCancel=()=>done(null);
+    const onClose=()=>{cleanup();res(null);};
+    function cleanup(){$('#dlgForm').removeEventListener('submit',onSubmit);$('#dlgCancel').removeEventListener('click',onCancel);d.removeEventListener('cancel',onClose);}
+    $('#dlgForm').addEventListener('submit',onSubmit);$('#dlgCancel').addEventListener('click',onCancel);d.addEventListener('cancel',onClose);
+    d.showModal();$('#dlgInput').focus();
+  });
+}
+
+/* ============ Shell ============ */
+function renderShell(route){
+  const n=fila().length;
+  const items=[['torre','Central'],['portfolio','Portfólio'],['fila','Minhas pendências'],['ciclos','Ciclos PQQ']];
+  if(USER.perfil!=='solicitante')items.splice(1,0,['solicitacoes','Solicitações de estudo']);
+  if(isPMO(USER))items.push(['integracoes','Integração PQQ / PMP'],['usuarios','Usuários e perfis']);
+  if(podeCriar(USER))items.splice(2,0,['novo','Novo projeto']);
+  const notifHub=META&&META.modo==='hub'&&window.STRATHUB&&window.STRATHUB.temNotificacoes;
+  $('#nav').innerHTML=items.map(([k,l])=>`<a href="#/${k}"${route===k||(route==='projeto'&&k==='portfolio')?' aria-current="page"':''}>${esc(l)}${k==='fila'&&n?`<span class="count">${n}</span>`:''}</a>`).join('')
+    +(notifHub?`<a href="#" id="oNotif">🔔 Notificações${S.notif?`<span class="count">${S.notif}</span>`:''}</a>`:'');
+  const on=$('#oNotif');if(on)on.onclick=ev=>{ev.preventDefault();window.STRATHUB.abrirNotificacoes();};
+  const hub=!!(META&&META.modo==='hub');
+  const lista=hub?[]:USERS.filter(u=>u.origem!=='hub');  // no hub a pessoa é sempre quem o hub disse
+  const master=hub&&SESSAO&&SESSAO.master;
+  $('#userSel').hidden=!lista.length;$('label[for=userSel]').textContent=hub?'':'Entrando como';
+  faixaTeste(hub&&SESSAO&&SESSAO.ambiente==='teste',master);
+  $('#userSel').innerHTML=lista.map(u=>`<option value="${esc(u.id)}"${u.id===USER.id?' selected':''}>${esc(u.nome)}${u.origem==='demo'?' (demo)':''} · ${esc(PERFIL[u.perfil]||u.perfil)}</option>`).join('');
+  $('#userInfo').textContent=(lista.length?'':USER.nome+' · '+(master?'qualquer papel':(PERFIL[USER.perfil]||USER.perfil))+' · ')+(USER.unidade?'Unidade: '+USER.unidade:'Acesso a todas as unidades');
+  $('#modeInfo').innerHTML=hub?'<b>Conectado ao hub</b> · '+esc((META.organizacao||{}).nome||''):'<b>Modo isolado</b> · '+esc(location.host);
+}
+function faixaTeste(ligada,master){
+  let f=document.getElementById('faixaTeste');
+  if(!ligada){if(f)f.remove();return;}
+  if(!f){f=document.createElement('div');f.id='faixaTeste';f.style.cssText='position:fixed;top:0;left:50%;transform:translateX(-50%);z-index:9999;pointer-events:none;max-width:92vw;background:#b45309;color:#fff;font:600 11.5px/1.3 system-ui,sans-serif;text-align:center;padding:4px 14px;border-radius:0 0 8px 8px;letter-spacing:.03em;box-shadow:0 2px 6px rgba(0,0,0,.18)';document.body.insertBefore(f,document.body.firstChild);}
+  f.textContent='AMBIENTE DE TESTE'+(master?' · você é MASTER TESTE: recebe todas as pendências e pode executar qualquer papel':'');
+}
+function render(){
+  S.pending=false;
+  const parts=(location.hash||'#/torre').slice(2).split('/').map(decodeURIComponent);
+  const route=parts[0]||'torre';
+  renderShell(route);
+  const m=$('#main');
+  if(!S.projetos.size&&!S.ciclos.size&&route!=='novo'&&route!=='ciclos'&&route!=='solicitacoes'){m.innerHTML=viewVazio();bindVazio();return;}
+  const erro=e=>{console.error(e);m.innerHTML=`<h1>Algo deu errado</h1><div class="note bad">${esc(e&&e.message||e)}</div><div class="row" style="margin-top:12px"><a class="btn primary" href="#/torre">← Voltar ao início</a>${META&&META.modo==='hub'?'<a class="btn" href="/">Portal STRAT·HUB</a>':''}</div>`;};
+  try{
+    let r;
+    if(route==='solicitacoes'){r=viewSolicitacoes();}
+    else if(route==='portfolio'){m.innerHTML=viewPortfolio();bindPortfolio();}
+    else if(route==='projeto'){r=viewProjeto(parts[1],parts[2]||'resumo');}
+    else if(route==='novo'){m.innerHTML=viewNovo();bindNovo();}
+    else if(route==='fila'){m.innerHTML=viewFila();}
+    else if(route==='ciclos'){m.innerHTML=viewCiclos();bindCiclos();}
+    else if(route==='integracoes'){r=viewIntegracoes();}
+    else if(route==='usuarios'){r=viewUsuarios();}
+    else renderTorre();
+    if(r&&r.catch)r.catch(erro);
+  }catch(e){erro(e);}
+}
+function renderTorre(){$('#main').innerHTML=viewTorre();bindFiltros(renderTorre);}
+
+/* ============ Vazio ============ */
+function viewVazio(){
+  return `<h1>Originação de Projetos</h1><p class="lede">Acompanhe cada projeto desde a demanda até a elegibilidade para o PQQ ou a rota extraordinária.</p>
+  <div class="panel empty-state"><h2>Nenhum projeto cadastrado ainda</h2>
+  <p>Comece cadastrando um ciclo PQQ e o primeiro projeto. Para conhecer a ferramenta, o PMO pode carregar um conjunto de exemplo com 14 projetos em estágios diferentes.</p>
+  <div class="row" style="justify-content:center">
+    ${isPMO(USER)?'<button class="btn primary" id="seedBtn">Carregar projetos de exemplo</button>':''}
+    ${podeCriar(USER)?'<a class="btn" href="#/novo" style="text-decoration:none">Cadastrar projeto</a>':''}
+    ${isPMO(USER)?'<a class="btn" href="#/ciclos" style="text-decoration:none">Cadastrar ciclo</a>':''}
+  </div></div>`;
+}
+function bindVazio(){const b=$('#seedBtn');if(b)b.onclick=async()=>{b.disabled=true;b.textContent='Carregando…';try{await gerarExemplo();toast('Projetos de exemplo carregados.');}catch(e){toast('Não foi possível carregar o exemplo: '+(e.message||e));}render();};}
+
+/* ============ Filtros ============ */
+function viewFiltros(){
+  const f=S.filtros;
+  const sits=['Em elaboração','Em validação','Devolvido para ajuste','Aguardando aprovação do Gerente Executivo','Liberado para envio ao PQQ','Publicando no PQQ','Aguardando aprovação PQQ','Em análise no PQQ','PQQ aprovado · aguardando Engenharia','Em análise da Engenharia · TAP','Aguardando aprovação da TAP','TAP aprovada · aguardando PMP','Na PMP','Suspenso','Cancelado'];
+  return `<div class="filters">
+   <label>Unidade<select data-flt="unidade">${opts(UNIDADES,f.unidade,'Todas')}</select></label>
+   <label>Diretoria<select data-flt="diretoria">${opts(DIRETORIAS,f.diretoria,'Todas')}</select></label>
+   <label>Estágio<select data-flt="estagio">${opts(Object.keys(IDX).map(k=>({v:k,l:ETAPA_NOME[k]})),f.estagio,'Todos')}</select></label>
+   <label>Ciclo<select data-flt="ciclo">${opts(ciclosOrdenados().map(c=>({v:c.id,l:c.nome})),f.ciclo,'Todos')}</select></label>
+   <label>Status<select data-flt="status">${opts(sits,f.status,'Todos')}</select></label>
+  </div>`;
+}
+function bindFiltros(rerender){document.querySelectorAll('[data-flt]').forEach(el=>el.onchange=()=>{S.filtros[el.dataset.flt]=el.value;rerender();});}
+
+/* ============ Torre de controle ============ */
+function viewTorre(){
+  const ps=filtrados().filter(p=>p.status!=='Cancelado');
+  const prox=S.filtros.ciclo?S.ciclos.get(S.filtros.ciclo):proximoCiclo();
+  const total=ps.reduce((a,p)=>a+capexTotal(p),0);
+  const doCiclo=prox?ps.filter(p=>(cicloDo(p)||{}).id===prox.id):[];
+  const byMat={};MATS.forEach(m=>byMat[m]={n:0,v:0});
+  doCiclo.forEach(p=>{const m=maturidade(p);byMat[m].n++;byMat[m].v+=capexTotal(p);});
+  const potencial=byMat['Elegível'].v+byMat['Em maturação'].v;
+  const etapas=['FSE','BC','FSP','ELEG','MADURO'].map(k=>{const l=ps.filter(p=>p.estagio===k);return {k,n:l.length,v:l.reduce((a,p)=>a+capexTotal(p),0),pend:l.filter(p=>k!=='MADURO'&&p.gates[k].status==='em_validacao').length,dev:l.filter(p=>k!=='MADURO'&&p.gates[k].status==='devolvido').length};});
+  const maxV=Math.max(1,...etapas.map(e=>e.v));
+  const porUn=UNIDADES.map(u=>({u,v:ps.filter(p=>p.unidade===u).reduce((a,p)=>a+capexTotal(p),0)})).filter(x=>x.v>0).sort((a,b)=>b.v-a.v);
+  const maxU=Math.max(1,...porUn.map(x=>x.v));
+  const risco=ps.filter(p=>maturidade(p)==='Em risco').sort((a,b)=>capexTotal(b)-capexTotal(a)).slice(0,6);
+  const dias=prox?diasAte(prox):null;
+  return `<h1>Central</h1>
+  <div class="countdown">${prox?`<span>Próximo corte:</span><b>${esc(prox.nome)}</b><span>em ${fmtData(prox.corte)}</span><b>${dias} ${dias===1?'dia':'dias'}</b>`:'<span>Nenhum ciclo PQQ aberto. Cadastre um ciclo para calcular a elegibilidade.</span>'}</div>
+  ${viewFiltros()}
+  <div class="stack">
+   <section class="panel" aria-labelledby="lm"><h2 id="lm">Linha de maturidade</h2>
+    <div class="line-wrap"><div class="mline">
+    ${etapas.map(e=>{const sz=Math.round(20+26*(e.v/maxV));return `<div class="station"><a href="#/portfolio" data-go-stage="${e.k}"><div class="sname">${ETAPA_NOME[e.k]}</div></a>
+      <div class="gate">${e.k==='MADURO'?'pronto para seguir':'Gate '+ETAPA_NOME[e.k]}</div>
+      <div class="dotbox"><div class="dot${e.k==='MADURO'?' term':''}" style="width:${sz}px;height:${sz}px"></div></div>
+      <div class="num">${e.n}</div><div class="cap">${fmtMi(e.v)}</div>
+      <div class="pend">${[e.pend?e.pend+' em validação':'',e.dev?e.dev+' devolvido'+(e.dev>1?'s':''):''].filter(Boolean).join(' · ')}</div></div>`;}).join('')}
+    </div></div>
+   </section>
+   <div><h3 style="margin:0 0 8px">Quantidade</h3><div class="kpis dual">
+    <div class="kpi"><div class="v">${ps.length}</div><div class="l">projetos no pipeline</div></div>
+    <div class="kpi"><div class="v">${ps.filter(p=>p.estagio==='FSE').length}</div><div class="l">projetos em FSE</div></div>
+    <div class="kpi"><div class="v">${byMat['Elegível'].n}</div><div class="l">projetos elegíveis</div></div>
+    <div class="kpi"><div class="v">${byMat['Em risco'].n}</div><div class="l">projetos em risco</div></div>
+   </div></div>
+   <div><h3 style="margin:0 0 8px">Financeiro</h3><div class="kpis dual">
+    <div class="kpi"><div class="v">${fmtMi(total)}</div><div class="l">CAPEX estruturado no pipeline</div></div>
+    <div class="kpi"><div class="v">${fmtMi(potencial)}</div><div class="l">CAPEX potencial ${prox?esc(prox.nome):'do próximo ciclo'}</div></div>
+    <div class="kpi"><div class="v">${fmtMi(byMat['Elegível'].v)}</div><div class="l">CAPEX elegível</div></div>
+    <div class="kpi"><div class="v">${ps.filter(p=>!capexTotal(p)).length}</div><div class="l">projetos ainda sem estimativa financeira</div></div>
+   </div></div>
+   <div class="grid2">
+    <section class="panel"><h2>Maturidade para ${prox?esc(prox.nome):'o próximo ciclo'}</h2>
+     ${doCiclo.length?`<div class="stackbar">${MATS.map(m=>byMat[m].v?`<div class="c-${MAT_CLASS[m]}" style="width:${byMat[m].v/doCiclo.reduce((a,p)=>a+capexTotal(p),0)*100}%" title="${m}"></div>`:'').join('')}</div>
+     <div class="legend">${MATS.map(m=>`<span class="sw c-${MAT_CLASS[m]}"></span><span>${m}</span><span>${byMat[m].n}</span><span class="muted">${fmtMi(byMat[m].v)}</span>`).join('')}</div>
+     <p class="muted" style="font-size:12.5px;margin:12px 0 0">Proporção por CAPEX. O potencial soma elegíveis e em maturação.</p>`
+     :'<p class="muted">Nenhum projeto aponta para este ciclo com os filtros atuais.</p>'}
+    </section>
+    <section class="panel"><h2>CAPEX por unidade</h2>
+     ${porUn.length?`<div class="bars">${porUn.map(x=>`<div class="bar"><span>${esc(x.u)}</span><div class="track"><div class="fillb" style="width:${x.v/maxU*100}%"></div></div><span class="val">${fmtMi(x.v)}</span></div>`).join('')}</div>`:'<p class="muted">Sem CAPEX com os filtros atuais.</p>'}
+    </section>
+   </div>
+   <section class="panel"><h2>Em risco para o corte</h2>
+    ${risco.length?`<ul class="list-plain">${risco.map(p=>`<li><a href="#/projeto/${encodeURIComponent(p.id)}">${esc(p.nome)}</a><span class="muted">${esc(p.unidade)} · ${ETAPA_NOME[p.estagio]}</span><span class="spacer"></span><b>${fmtMi(capexTotal(p))}</b></li>`).join('')}</ul>`:'<p class="muted">Nenhum projeto em risco com os filtros atuais.</p>'}
+   </section>
+  </div>`;
+}
+document.addEventListener('click',e=>{const a=e.target.closest('[data-go-stage]');if(a){S.filtros.estagio=a.dataset.goStage;}});
+
+/* ============ Portfólio ============ */
+function viewPortfolio(){
+  const ps=filtrados().sort((a,b)=>a.id.localeCompare(b.id));
+  const canExport=true;
+  return `<div class="head"><div><h1>Portfólio</h1><p class="lede">${ps.length} projeto${ps.length===1?'':'s'} · ${fmtMi(ps.reduce((a,p)=>a+(p.status==='Cancelado'?0:capexTotal(p)),0))}</p></div>
+   <div class="row">${canExport?`<button class="btn" data-exp="xlsx">Exportar Excel</button><button class="btn" data-exp="csv">CSV</button><button class="btn" data-exp="json">JSON</button>`:'<span class="muted" style="font-size:13px">Exportação disponível ao abrir a ferramenta pelo claude.ai</span>'}
+   ${podeCriar(USER)?'<a class="btn primary" href="#/novo" style="text-decoration:none">Novo projeto</a>':''}</div></div>
+  <div class="row" style="margin-bottom:10px"><input type="search" id="busca" placeholder="Buscar por nome, ID, PEP ou responsável" value="${esc(S.busca)}" style="width:min(420px,100%)"></div>
+  ${viewFiltros()}
+  <div class="tablewrap"><table>
+   <thead><tr><th>Projeto</th><th>Unidade</th><th>Estágio</th><th class="num">CAPEX</th><th>Próximo ciclo</th><th>Maturidade</th><th>Status</th></tr></thead>
+   <tbody>${ps.length?ps.map(p=>{const c=cicloDo(p);const m=maturidade(p);const s=situacao(p);
+     return `<tr class="click" data-open="${esc(p.id)}" tabindex="0"><td><div class="pname">${esc(p.nome)}</div><div class="pid">${esc(p.id)}${p.pep?' · PEP '+esc(p.pep):''}${p.caminho==='extraordinario'?' · rota extraordinária':''}</div></td>
+     <td>${esc(p.unidade)}<div class="pid">${esc(p.diretoria)}</div></td><td>${ETAPA_NOME[p.estagio]}</td><td class="num">${fmtMi(capexTotal(p))}</td>
+     <td>${c?esc(c.nome):'—'}</td><td><span class="badge b-${MAT_CLASS[m]}">${m}</span></td>
+     <td><span class="badge ${s==='Devolvido para ajuste'?'b-no':s==='Em validação'?'b-risk':s==='Maduro'?'b-eleg':'b-neutral'}">${esc(s)}</span></td></tr>`;}).join('')
+     :'<tr><td colspan="7" class="muted" style="text-align:center;padding:28px">Nenhum projeto encontrado. Ajuste os filtros ou a busca.</td></tr>'}</tbody></table></div>`;
+}
+function bindPortfolio(){
+  bindFiltros(()=>{$('#main').innerHTML=viewPortfolio();bindPortfolio();});
+  const b=$('#busca');b.oninput=()=>{S.busca=b.value;const pos=b.selectionStart;$('#main').innerHTML=viewPortfolio();bindPortfolio();const nb=$('#busca');nb.focus();nb.setSelectionRange(pos,pos);};
+  document.querySelectorAll('[data-open]').forEach(tr=>{const go=()=>location.hash='#/projeto/'+encodeURIComponent(tr.dataset.open);tr.onclick=go;tr.onkeydown=e=>{if(e.key==='Enter')go();};});
+  document.querySelectorAll('[data-exp]').forEach(btn=>btn.onclick=()=>exportar(btn.dataset.exp,filtrados()));
+}
+
+/* ============ Solicitações de estudo ============ */
+async function viewSolicitacoes(){
+  const m=$('#main');m.innerHTML='<h1>Solicitações de estudo</h1><p class="lede">Carregando solicitações recebidas…</p>';
+  try{
+    const xs=await api('GET','/api/solicitacoes');
+    const badge=s=>({EM_ANALISE:'b-mat',COMPLEMENTACAO:'b-risk',APROVADA:'b-eleg',ENCERRADA:'b-no'}[s]||'b-neutral');
+    m.innerHTML=`<h1>Solicitações de estudo</h1><p class="lede">Entrada da Engenharia/PMO. A aprovação cria o ID visual PMO e leva a iniciativa para o Business Case na Central, sem recriar o projeto.</p>
+    <section class="summary-cards"><div class="summary-card"><span class="meta">Em análise</span><div class="sv">${xs.filter(x=>x.status==='EM_ANALISE').length}</div></div><div class="summary-card"><span class="meta">Complementação</span><div class="sv">${xs.filter(x=>x.status==='COMPLEMENTACAO').length}</div></div><div class="summary-card"><span class="meta">Aprovadas</span><div class="sv">${xs.filter(x=>x.status==='APROVADA').length}</div></div></section>
+    <section class="panel"><div class="tablewrap"><table><thead><tr><th>Protocolo</th><th>Solicitante</th><th>Necessidade</th><th>Pré-CAPEX</th><th>Status</th><th>Ação</th></tr></thead><tbody>${xs.length?xs.map(x=>`<tr><td><button class="btn small" data-solview="${esc(x.request_uuid)}" title="Visualizar formulário completo">${esc(x.protocolo)}</button>${x.visual_id?`<div class="pid">${esc(x.visual_id)}</div>`:''}</td><td>${esc(x.requester_nome)}<div class="pid">${esc(x.unidade||'')}</div></td><td>${esc((x.conteudo&&x.conteudo.necessidade_descricao)||'')}</td><td>${esc(x.capex_resultado||'')}</td><td><span class="badge ${badge(x.status)}">${esc(x.status)}</span></td><td>${x.status==='APROVADA'?`<a class="btn small" href="#/projeto/${encodeURIComponent(x.project_id)}/resumo">Abrir projeto</a>`:x.status==='ENCERRADA'?'—':`<button class="btn small" data-sol="${x.request_uuid}" data-act="approve">Aprovar</button> <button class="btn small" data-sol="${x.request_uuid}" data-act="return">Devolver</button> <button class="btn small" data-sol="${x.request_uuid}" data-act="close">Encerrar</button>`}</td></tr>`).join(''):'<tr><td colspan="6" class="muted">Nenhuma solicitação recebida.</td></tr>'}</tbody></table></div></section>`;
+    document.querySelectorAll('[data-solview]').forEach(b=>b.onclick=()=>{const x=xs.find(a=>a.request_uuid===b.dataset.solview);if(!x)return;const conteudo=x.conteudo||{},capex=x.capex_respostas||{};const row=(k,v)=>`<div class="review-entry" style="padding:9px 0;border-bottom:1px solid #eee"><b>${esc(k)}</b><div style="white-space:pre-wrap">${esc(v??'Não informado')}</div></div>`;const modal=document.createElement('dialog');modal.style.cssText='width:min(780px,95vw);max-height:85vh;border:1px solid #ddd;border-radius:15px;padding:25px';modal.innerHTML=`<h2>Solicitação ${esc(x.protocolo)}</h2><p class="muted">${esc(x.requester_nome)} · ${esc(x.unidade)} · ${esc(x.status)}</p><h3>Respostas da FSE</h3>${Object.entries(conteudo).map(([k,v])=>row(k.replaceAll('_',' '),v)).join('')}<h3>Pré-enquadramento CAPEX</h3>${Object.entries(capex).map(([k,v])=>row(k,v)).join('')}<div style="text-align:right;padding-top:15px"><button class="btn primary" id="closeSolModal">Fechar</button></div>`;document.body.appendChild(modal);modal.showModal();modal.querySelector('#closeSolModal').onclick=()=>modal.close();modal.addEventListener('close',()=>modal.remove());});document.querySelectorAll('[data-sol]').forEach(b=>b.onclick=async()=>{const act=b.dataset.act;const id=b.dataset.sol;let comentario='';if(act!=='approve'){comentario=prompt(act==='return'?'Motivo da devolução':'Motivo do encerramento')||'';if(!comentario)return;}b.disabled=true;try{const r=await api('POST',`/api/solicitacoes/${id}/${act}`,{comentario});if(r&&r.visual_id)toast('FSE aprovada. ID '+r.visual_id+' criado.');else toast('Solicitação atualizada.');await carregar();viewSolicitacoes();}catch(e){toast(e.message);b.disabled=false;}});
+  }catch(e){m.innerHTML=`<h1>Solicitações de estudo</h1><div class="note">Não foi possível carregar: ${esc(e.message)}</div>`;}
+}
+
+/* ============ Exportação ============ */
+function linhasExport(ps){
+  const as=anos();
+  return ps.map(p=>{const c=cicloDo(p);const r={ID:p.id,PEP:p.pep||'',Projeto:p.nome,Unidade:p.unidade,Diretoria:p.diretoria,Responsavel:p.responsavel||'',Solicitante:p.solicitante||'',
+    Estagio:ETAPA_NOME[p.estagio],Situacao:situacao(p),Status:p.status,Caminho:p.caminho==='extraordinario'?'Extraordinário':'Regular',
+    Ciclo:c?c.nome:'',Maturidade:maturidade(p),CAPEX_Total_nominal:capexTotal(p),CAPEX_Estimado_nominal:Number(p.capexEstimado)||0};
+    as.forEach(a=>r['CAPEX_'+a+'_nominal']=Number((p.capexAno||{})[a])||0);
+    GATES.forEach(g=>r['Gate_'+g]=p.gates[g].status);
+    r.Criado_em=p.criadoEm;r.Atualizado_em=p.atualizadoEm;return r;});
+}
+function baixarBlob(blob,filename){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1000);}
+async function exportar(fmt,ps){
+  const stamp=new Date().toISOString().slice(0,10);
+  const filename=`originacao-projetos-${stamp}.${fmt}`;
+  try{
+    if(fmt==='json'){
+      baixarBlob(new Blob([JSON.stringify({exportadoEm:nowIso(),exportadoPor:USER.nome,ciclos:ciclosOrdenados(),projetos:ps.map(p=>Object.assign(clone(p),{maturidadeCalculada:maturidade(p),capexTotal:capexTotal(p)}))},null,2)],{type:'application/json'}),filename);
+    }else if(fmt==='csv'){
+      const rows=linhasExport(ps);
+      const cols=rows.length?Object.keys(rows[0]):['ID'];
+      const cell=v=>{let s=typeof v==='number'?v.toLocaleString('pt-BR',{useGrouping:false,maximumFractionDigits:2}):String(v??'');return /[;"\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;};
+      baixarBlob(new Blob(['\ufeff'+[cols.join(';')].concat(rows.map(r=>cols.map(c=>cell(r[c])).join(';'))).join('\r\n')],{type:'text/csv'}),filename);
+    }else{
+      const r=await fetch(appUrl('/api/exportar/xlsx'),{method:'POST',headers:{'Content-Type':'application/json','X-Usuario':USER.id},
+        body:JSON.stringify({linhas:linhasExport(ps),ciclos:ciclosOrdenados().map(c=>({ID:c.id,Ciclo:c.nome,Abertura:c.abertura,Corte:c.corte,Inicio:c.inicio,Fim:c.fim}))})});
+      if(!r.ok)throw new Error('Erro '+r.status);
+      baixarBlob(await r.blob(),filename);
+    }
+    toast('Arquivo exportado.');
+  }catch(e){toast('Não foi possível exportar: '+(e.message||'erro'));}
+}
+
+/* ============ Novo projeto ============ */
+function viewNovo(){
+  if(!podeCriar(USER))return `<h1>Novo projeto</h1><div class="note">O perfil ${esc(PERFIL[USER.perfil])} não cadastra projetos. Entre como solicitante ou PMO.</div>`;
+  const prox=proximoCiclo();
+  return `<a class="back" href="#/portfolio">← Portfólio</a><h1>Novo projeto</h1>
+  <p class="lede">O projeto nasce na etapa FSE e recebe um ID de originação que não muda mais, mesmo depois de ganhar PEP no SAP.</p>
+  <div class="panel"><div class="form" id="novoForm">
+   <label class="field full"><span>Nome do projeto *</span><input type="text" data-n="nome" maxlength="160"></label>
+   <label class="field"><span>Unidade *</span><select data-n="unidade">${opts(UNIDADES,USER.unidade||'','Selecione')}</select></label>
+   <label class="field"><span>Diretoria *</span><select data-n="diretoria">${opts(DIRETORIAS,'','Selecione')}</select></label>
+   <label class="field"><span>Responsável *</span><input type="text" data-n="responsavel" value="${esc(USER.perfil==='solicitante'?USER.nome:'')}"></label>
+   <label class="field"><span>Ciclo PQQ pretendido</span><select data-n="cicloId">${opts(ciclosOrdenados().map(c=>({v:c.id,l:c.nome})),prox?prox.id:'','Definir depois')}</select></label>
+   <label class="field"><span>Urgência</span><select data-n="urgencia">${opts(URG,'Média')}</select></label>
+   <label class="field full"><span>Problema ou necessidade *</span><textarea data-n="problema"></textarea></label>
+   <label class="field full"><span>Descrição da demanda</span><textarea data-n="descricao"></textarea></label>
+  </div>
+  <p id="novoErr" style="color:var(--bad);font-size:14px;min-height:20px"></p>
+  <div class="row"><button class="btn primary" id="criarBtn">Criar projeto</button><a href="#/portfolio" class="btn" style="text-decoration:none">Cancelar</a></div></div>`;
+}
+function bindNovo(){
+  const b=$('#criarBtn');if(!b)return;
+  b.onclick=async()=>{
+    const v={};document.querySelectorAll('[data-n]').forEach(el=>v[el.dataset.n]=el.value.trim());
+    const miss=[['nome','nome'],['unidade','unidade'],['diretoria','diretoria'],['responsavel','responsável'],['problema','problema ou necessidade']].filter(([k])=>!v[k]).map(x=>x[1]);
+    if(miss.length){$('#novoErr').textContent='Preencha: '+miss.join(', ')+'.';return;}
+    b.disabled=true;b.textContent='Criando…';
+    try{
+      const id=await proximoId();
+      const t=nowIso();
+      const p={id,pep:'',nome:v.nome,descricao:v.descricao,unidade:v.unidade,diretoria:v.diretoria,responsavel:v.responsavel,solicitante:USER.nome,solicitanteId:USER.id,
+        estagio:'FSE',status:'Ativo',cicloId:v.cicloId||'',capexEstimado:null,capexAno:{},
+        fse:{problema:v.problema,urgencia:v.urgencia,area:v.unidade,justificativa:''},bc:{},fsp:{eapId:'',atividades:[],distribuicaoMensal:{}},
+        gates:{FSE:{status:'rascunho'},BC:{status:'rascunho'},FSP:{status:'rascunho'},ELEG:{status:'rascunho'}},
+        caminho:'regular',extra:null,maturidadeManual:'',documentos:[],validacoes:[],hist:[],criadoEm:t,atualizadoEm:t};
+      addHist(p,{acao:'Projeto criado',campo:'',de:'',para:p.nome});
+      await writeDoc('projetos',p);
+      toast('Projeto '+id+' criado.');location.hash='#/projeto/'+encodeURIComponent(id)+'/FSE';
+    }catch(e){toast('Não foi possível criar o projeto: '+(e.message||e));b.disabled=false;b.textContent='Criar projeto';}
+  };
+}
+function maxLocalId(){let m=0;S.projetos.forEach(p=>{const n=parseInt(String(p.id).replace(/\D/g,''),10);if(n>m)m=n;});return m;}
+const fmtId=n=>'ORI-'+String(n).padStart(6,'0');
+async function proximoId(){return (await api('POST','/api/sequencia')).id;}
+
+/* ============ Ficha do projeto ============ */
+function linhaProjeto(p){
+  const idx=IDX[p.estagio];
+  const q=p.pqq||{},t=p.tap||{},m=p.pmp||{};
+  const fases=['FSE','BC','FSP','ELEG','PQQ','TAP','PMP'];
+  const atual=idx<4?idx:((m.status==='publicado'||m.status==='recebido'||m.status==='pronto_para_publicacao'||t.status==='aprovado')?6:((t.status||q.status==='aprovado'||(q.retorno||{}).status==='aprovado')?5:4));
+  const qStatus=q.status==='em_aprovacao_envio'?'aguardando aprovação do Gerente Executivo':q.status==='liberado_para_envio'?'liberado para envio':q.status==='publicando'?'publicando no PQQ':q.status==='enviado'?'aguardando aprovação PQQ':q.status==='em_analise'?'em análise no PQQ':q.status==='aprovado'?'aprovado no PQQ':'';
+  const tStatus=t.status==='em_analise_engenharia'?'em análise da Engenharia':t.status==='em_aprovacao'?'aguardando aprovação da TAP':t.status==='aprovado'?'TAP aprovada':t.status==='devolvido'?'devolvido para ajuste':'';
+  const pStatus=m.status==='pronto_para_publicacao'?'aguardando publicação':m.status==='publicado'||m.status==='recebido'?'na PMP':'';
+  const sub=[
+    ...['FSE','BC','FSP','ELEG'].map((k,i)=>({rascunho:i===idx?'em elaboração':'',em_validacao:'em validação',devolvido:'devolvido',aprovado:'aprovado'}[p.gates[k].status]||'')),
+    qStatus,tStatus,pStatus
+  ];
+  const done=[...['FSE','BC','FSP','ELEG'].map(k=>p.gates[k].status==='aprovado'),
+    ['enviado','em_analise','aprovado'].includes(q.status),['em_aprovacao','aprovado'].includes(t.status),m.status==='publicado'||m.status==='recebido'];
+  const fillPct=done.filter(Boolean).length/6*80;
+  return `<div class="pline"><div class="pfill" style="width:${fillPct}%"></div>
+   ${fases.map((k,i)=>{
+     let cls='',mark='';
+     if(i<4){const st=p.gates[k].status;if(st==='aprovado'){cls='done';mark='✓';}else if(i===idx){cls=st==='em_validacao'?'wait':st==='devolvido'?'back':'cur';mark=st==='em_validacao'?'…':st==='devolvido'?'!':'';}}
+     else if(done[i]){cls='done';mark='✓';}
+     else if(i===atual){cls=(i===4&&q.status==='publicando')?'wait':(i===4&&q.status==='devolvido_para_ajuste')?'back':'cur';mark=cls==='wait'?'…':cls==='back'?'!':'';}
+     const liberada=i<4?(i<=idx||p.gates[k].status==='aprovado'):true;
+     const href=i<4?`#/projeto/${encodeURIComponent(p.id)}/${k}`:`#/projeto/${encodeURIComponent(p.id)}/${i===6?'resumo':'fluxo'}`;
+     return `<div class="pst ${cls}${liberada?'':' locked'}"><a href="${href}"><div class="pdot" aria-hidden="true">${mark}</div><b>${({FSE:'FSE',BC:'BC',FSP:'FSP',ELEG:'Elegibilidade',PQQ:'PQQ',TAP:'TAP',PMP:'PMP'})[k]}</b><small>${sub[i]||''}</small></a></div>`;}).join('')}
+  </div>`;
+}
+function campoHtml(p,[f,label,tipo],editavel){
+  const v=getP(p,f);const full=tipo==='area'?' full':'';
+  if(!editavel){
+    let txt=v;
+    if(tipo==='num')txt=vazio(v)?'':'R$ '+fmtMil(v);if(tipo==='int')txt=vazio(v)?'':String(v)+' meses';
+    if(tipo==='ciclo')txt=v&&S.ciclos.get(v)?S.ciclos.get(v).nome:(v?'Ciclo removido':'');
+    return `<div class="field${full}"><span>${esc(label)}</span><div class="readonly${vazio(txt)?' empty':''}">${vazio(txt)?'Não informado':esc(txt)}</div></div>`;
+  }
+  let input;
+  if(tipo==='area')input=`<textarea data-f="${f}">${esc(v)}</textarea>`;
+  else if(tipo==='num')input=`<input type="number" step="0.01" min="0" data-f="${f}" data-t="num" value="${vazio(v)?'':esc(v)}">`;else if(tipo==='int')input=`<input type="number" step="1" min="1" data-f="${f}" data-t="num" value="${vazio(v)?'':esc(v)}">`;
+  else if(tipo==='ciclo')input=`<select data-f="${f}">${opts(ciclosOrdenados().map(c=>({v:c.id,l:c.nome})),v,'Não definido')}</select>`;
+  else if(tipo.startsWith('sel:'))input=`<select data-f="${f}">${opts(LISTAS[tipo.slice(4)],v,'Selecione')}</select>`;
+  else input=`<input type="text" data-f="${f}" value="${esc(v)}">`;
+  return `<label class="field${full}"><span>${esc(label)}</span>${input}</label>`;
+}
+function capexGrid(p,editavel,usarPqqAprovado=false){
+  let ca=p.capexAno||{};
+  if(usarPqqAprovado&&((p.pqq||{}).retorno||{}).status==='aprovado'){
+    ca={};Object.entries(p.pqq.retorno.curva_mensal||{}).forEach(([m,v])=>{const y=m.slice(0,4);ca[y]=(ca[y]||0)+Number(v||0);});
+  }
+  const as=Object.keys(ca).map(Number).sort((a,b)=>a-b);
+  if(!as.length)return `<p class="muted">A distribuição anual será gerada automaticamente a partir do cronograma físico-financeiro da FSP.</p>`;
+  const totalDistribuicao=Object.values(ca).reduce((s,v)=>s+(Number(v)||0),0);
+  return `<div class="annual-grid">${as.map(a=>`<div class="annual-cell"><span class="meta">${a}</span><b>${fmtMi(ca[a])}</b></div>`).join('')}</div>
+   <p class="meta" style="margin:8px 0 0">Total desta distribuição: <b>${fmtMi(totalDistribuicao)}</b>. Valores armazenados nominalmente e exibidos em escala gerencial.</p>`;
+}
+function botoesSalvar(){return `<div class="row" style="margin-top:18px"><button class="btn primary" id="saveBtn">Salvar alterações</button><button class="btn" id="cancelBtn">Descartar</button></div>`;}
+
+function viewProjeto(id,aba){
+  const m=$('#main');const p=S.projetos.get(id);
+  if(!p||!podeVer(p,USER)){m.innerHTML=`<a class="back" href="#/portfolio">← Portfólio</a><h1>Projeto não encontrado</h1><p class="lede">O projeto ${esc(id)} não existe ou não está visível para o perfil ${esc(PERFIL[USER.perfil])}${USER.unidade?' da unidade '+esc(USER.unidade):''}.</p>`;return;}
+  const m2=maturidade(p);const c=cicloDo(p);
+  const laterais=[['resumo','Resumo'],['fluxo','PQQ e TAP'],['validacoes','Validações'],['documentos','Documentos'],['historico','Histórico']];
+  let body='';
+  if(aba==='resumo')body=abaResumo(p);
+  else if(['FSE','BC','FSP','ELEG'].includes(aba))body=abaEtapa(p,aba);
+  else if(aba==='fluxo')body=abaFluxo(p);
+  else if(aba==='validacoes')body=abaValidacoes(p);
+  else if(aba==='documentos')body=abaDocumentos(p);
+  else body=abaHistorico(p);
+  m.innerHTML=`<div class="note info refresh" id="refreshNote" hidden>Este projeto foi atualizado por outra pessoa. <button class="btn small" id="reloadBtn">Descartar minhas edições e recarregar</button></div>
+  <a class="back" href="#/portfolio">← Portfólio</a>
+  <div class="head"><div><div class="pid">${esc(p.id)}${p.pep?' · PEP '+esc(p.pep):''} · ${esc(p.unidade)} · ${esc(p.diretoria)}</div><h1>${esc(p.nome)}</h1>
+   <div class="meta">Responsável ${esc(p.responsavel||'—')} · Solicitante ${esc(p.solicitante||'—')} · Criado em ${fmtData(p.criadoEm)}</div></div>
+   <div style="text-align:right"><div style="font-stretch:75%;font-weight:760;font-size:30px;line-height:1">${capexTotal(p)?fmtMi(capexTotal(p)):'CAPEX não estimado'}</div>
+   <div class="row" style="justify-content:flex-end;margin-top:6px"><span class="badge b-${MAT_CLASS[m2]}">${m2}</span>${c?`<span class="meta">${esc(c.nome)}</span>`:''}${p.status!=='Ativo'?`<span class="badge b-no">${esc(p.status)}</span>`:''}${p.caminho==='extraordinario'?'<span class="badge b-risk">Rota extraordinária</span>':''}</div></div></div>
+  ${linhaProjeto(p)}
+  <div class="project-layout"><nav class="project-side" aria-label="Visões complementares">${laterais.map(([k,l])=>`<a href="#/projeto/${encodeURIComponent(p.id)}/${k}"${k===aba?' aria-current="page"':''}>${l}</a>`).join('')}</nav><div>${body}</div></div>`;
+  const rb=$('#reloadBtn');if(rb)rb.onclick=()=>{S.editing=false;render();};
+  bindProjeto(p,aba);
+}
+function resumoTexto(p,campo){const v=getP(p,campo);return vazio(v)?'Não informado':esc(v);}
+function abaResumo(p){
+  const c=cicloDo(p);const at=(p.fsp&&p.fsp.atividades)||[];const ini=at.map(a=>a.inicio).filter(Boolean).sort()[0];const fim=at.map(a=>a.fim).filter(Boolean).sort().slice(-1)[0];
+  const cap=capexTotal(p);const bc=Number(getP(p,'bc.capexInicial'))||0;const varCap=cap&&bc?cap-bc:0;
+  return `<div class="stack">
+   <section class="summary-cards">
+    <div class="summary-card"><span class="meta">Estágio atual</span><div class="sv">${ETAPA_NOME[p.estagio]}</div></div>
+    <div class="summary-card"><span class="meta">CAPEX vigente</span><div class="sv">${cap?fmtMi(cap):'Não estimado'}</div></div>
+    <div class="summary-card"><span class="meta">Prazo BC</span><div class="sv">${getP(p,'bc.prazo')?esc(getP(p,'bc.prazo'))+' meses':'—'}</div></div>
+    <div class="summary-card"><span class="meta">Ciclo pretendido</span><div class="sv">${c?esc(c.nome):'A definir'}</div></div>
+    <div class="summary-card"><span class="meta">Maturidade</span><div class="sv">${esc(maturidade(p))}</div></div>
+   </section>
+   <section class="panel"><h2>Visão geral do projeto</h2><div class="grid2">
+    <div><h3>Problema / necessidade</h3><div class="readonly">${resumoTexto(p,'fse.problema')}</div></div>
+    <div><h3>Objetivo</h3><div class="readonly">${resumoTexto(p,'bc.objetivo')}</div></div>
+    <div><h3>Escopo vigente</h3><div class="readonly">${resumoTexto(p,p.fsp&&p.fsp.escopo?'fsp.escopo':'bc.escopo')}</div></div>
+    <div><h3>Responsabilidade</h3><div class="readonly">${esc(p.responsavel||'—')} · ${esc(p.unidade||'—')} · ${esc(p.diretoria||'—')}</div></div>
+   </div></section>
+   <section class="panel"><h2>Situação atual</h2>${proximaAcaoHtml(p)}</section>
+   <section class="panel"><h2>Visão financeira e temporal</h2><div class="row" style="margin-bottom:14px"><span class="badge b-neutral">BC ${bc?fmtMi(bc):'sem estimativa'}</span><span class="badge b-neutral">${((p.pqq||{}).retorno||{}).status==='aprovado'?'PQQ aprovado':'FSP estimado'} ${cap?fmtMi(cap):'sem cronograma'}</span>${bc&&cap&&((p.pqq||{}).retorno||{}).status!=='aprovado'?`<span class="badge ${varCap>0?'b-risk':varCap<0?'b-eleg':'b-neutral'}">Variação ${varCap>=0?'+':''}${fmtMi(varCap)}</span>`:''}<span class="meta">${ini?fmtData(ini):'—'} → ${fim?fmtData(fim):'—'}</span></div>${capexGrid(p,false,true)}</section>
+  </div>`;
+}
+function proximaAcaoHtml(p){
+  if(p.estagio==='MADURO')return `<div class="note info next-action"><b>Projeto maduro.</b> Pronto para seguir conforme a elegibilidade e o ciclo definido.</div>`;
+  const g=p.estagio,s=p.gates[g];let txt='Complete os dados da etapa e envie para validação.';
+  if(s.status==='em_validacao')txt=podeAprovar(p,g,USER)?'Ação necessária de você: aprovar ou devolver esta etapa.':'Etapa aguardando decisão do validador responsável.';
+  if(s.status==='devolvido')txt='Ajuste os pontos devolvidos e reenvie para validação.';
+  return `<div class="note info next-action"><b>${ETAPA_NOME[g]}</b> · ${esc(txt)}</div>`;
+}
+function gerarDistribuicao(atividades){
+  const mensal={}, anual={};
+  (atividades||[]).forEach(a=>{const custo=Number(a.custo)||0;if(!a.inicio||!a.fim||custo<=0)return;let d=new Date(a.inicio+'T12:00:00');const e=new Date(a.fim+'T12:00:00');if(e<d)return;const meses=[];let cur=new Date(d.getFullYear(),d.getMonth(),1,12);const end=new Date(e.getFullYear(),e.getMonth(),1,12);while(cur<=end){meses.push(cur.getFullYear()+'-'+String(cur.getMonth()+1).padStart(2,'0'));cur.setMonth(cur.getMonth()+1);}const v=custo/Math.max(1,meses.length);meses.forEach((m,i)=>{const vv=i===meses.length-1?custo-v*(meses.length-1):v;mensal[m]=(mensal[m]||0)+vv;const y=m.slice(0,4);anual[y]=(anual[y]||0)+vv;});});
+  return {mensal,anual};
+}
+function cronogramaFspHtml(p,ed){
+  const fsp=p.fsp||{};const ats=fsp.atividades||[];const eap=fsp.eapId||'';
+  const optsEap=Object.entries(EAPS).map(([id,x])=>`<option value="${id}"${id===eap?' selected':''}>${esc(x.nome)}</option>`).join('');
+  return `<section class="panel"><h2>Cronograma físico-financeiro</h2><p class="muted" style="margin-top:0">Selecione uma EAP padrão e ajuste as atividades do projeto. O sistema gera a distribuição mensal no backoffice e consolida os valores por ano.</p>
+   <div class="summary-cards" id="fspFinanceSummary" style="margin:12px 0"><div class="summary-card"><span class="meta">CAPEX informado no BC</span><div class="sv">${fmtMi(Number(p.bc?.capexInicial)||0)}</div></div><div class="summary-card"><span class="meta">Distribuído nas atividades</span><div class="sv" id="fspAllocated">—</div></div><div class="summary-card"><span class="meta">Saldo a distribuir</span><div class="sv" id="fspBalance">—</div></div></div>
+   <div class="eap-grid"><label class="field"><span>EAP padrão</span><select id="eapSel" ${ed?'':'disabled'}><option value="">Selecione</option>${optsEap}</select></label>${ed?'<div><button class="btn" id="loadEap">Carregar / recriar atividades da EAP</button></div>':''}</div>
+   <div class="tablewrap" style="margin-top:16px"><table class="activity-table"><thead><tr><th>Atividade</th><th>Data inicial</th><th>Data final</th><th class="num">Custo nominal (R$)</th>${ed?'<th></th>':''}</tr></thead><tbody id="atividadeBody">
+   ${ats.length?ats.map((a,i)=>`<tr data-ai="${i}"><td><input type="text" data-af="nome" value="${esc(a.nome||'')}" ${ed?'':'disabled'}></td><td><input type="date" data-af="inicio" value="${esc(a.inicio||'')}" ${ed?'':'disabled'}></td><td><input type="date" data-af="fim" value="${esc(a.fim||'')}" ${ed?'':'disabled'}></td><td><input class="money" type="number" step="0.01" min="0" data-af="custo" value="${esc(a.custo||'')}" ${ed?'':'disabled'}></td>${ed?`<td><button class="btn small bad" data-rmact="${i}">Remover</button></td>`:''}</tr>`).join(''):`<tr><td colspan="${ed?5:4}" class="muted">Nenhuma atividade cadastrada.</td></tr>`}
+   </tbody></table></div>${ed?'<div class="row" style="margin-top:10px"><button class="btn" id="addAct">+ Adicionar atividade</button></div>':''}
+  </section>`;
+}
+function elegibilidadeHtml(p){const c=cicloDo(p),suggested=proximoCiclo();const can=isPMO(USER)||USER.perfil==='validador';return `<section class="panel"><h2>Elegibilidade</h2><div class="summary-cards"><div class="summary-card"><span class="meta">Classificação</span><div class="sv">${esc(maturidade(p))}</div></div><div class="summary-card"><span class="meta">Ciclo confirmado</span><div class="sv">${c?esc(c.nome):'Não definido'}</div></div><div class="summary-card"><span class="meta">CAPEX estruturado</span><div class="sv">${capexTotal(p)?fmtMi(capexTotal(p)):'—'}</div></div></div><p class="muted" style="margin-top:16px">Selecione e salve o ciclo pretendido antes de enviar o Gate. A indicação de ciclo sugerido não representa uma associação confirmada.</p>${can?`<div class="row" style="margin-top:14px"><label class="field"><span>Ciclo PQQ pretendido</span><select id="cycleElegSel">${opts(ciclosOrdenados().map(c=>({v:c.id,l:c.nome})),p.cicloId||'','Selecione um ciclo')}</select></label><button class="btn primary" id="saveCycleEleg">Salvar ciclo</button></div>${!p.cicloId&&suggested?`<p class="meta">Sugestão: ${esc(suggested.nome)}. Selecione para confirmar.</p>`:''}`:''}${isPMO(USER)?`<div class="row" style="margin-top:14px"><span class="meta">Ajuste manual PMO</span><select id="matSel">${opts(MATS,p.maturidadeManual,'Automática (regra)')}</select><button class="btn" id="matBtn">Aplicar</button></div>`:''}</section>`;}
+
+function acoesGateEtapa(p,sec){
+  const g=p.gates[sec],falta=faltando(p,sec);let html='';
+  if(p.estagio===sec&&['rascunho','devolvido'].includes(g.status)&&podeEditar(p,USER))html=`<section class="panel next-action"><h3>Próxima ação · Gate ${ETAPA_NOME[sec]}</h3><div>${GATE_CRIT[sec]}</div>${falta.length?`<p class="muted">Para enviar, preencha e salve:</p><ul class="missing">${falta.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:'<p class="muted">Tudo pronto para validação.</p>'}<button class="btn primary" data-enviar="${sec}"${falta.length?' disabled':''}>Enviar para validação</button></section>`;
+  else if(g.status==='em_validacao'&&podeAprovar(p,sec,USER))html=`<section class="panel next-action"><h3>Ação necessária · Gate ${ETAPA_NOME[sec]}</h3><p class="muted">${GATE_CRIT[sec]}</p><div class="row"><button class="btn ok" data-aprovar="${sec}">Aprovar</button><button class="btn bad" data-devolver="${sec}">Devolver para ajuste</button></div></section>`;
+  else if(g.status==='em_validacao')html=`<section class="panel next-action"><h3>Aguardando validação</h3><p class="muted">Aprovação prevista para ${GATE_APROVA[sec].map(x=>PERFIL[x]).join(' ou ')}.</p></section>`;
+  return html;
+}
+function abaEtapa(p,sec){
+  if(!secaoLiberada(p,sec)){const ant=GATES[IDX[sec]-1];return `<div class="panel empty-state"><h2>${ETAPA_NOME[sec]} ainda não liberado</h2><p>Esta etapa abre depois da aprovação do Gate ${ETAPA_NOME[ant]}. O projeto está em ${ETAPA_NOME[p.estagio]}.</p></div>`;}
+  const ed=podeEditarSecao(p,USER,sec);const g=p.gates[sec];let aviso='';
+  if(g.status==='em_validacao')aviso=`<div class="note">Enviado para validação em ${fmtDH(g.enviadoEm)} por ${esc(g.enviadoPor)}.</div>`;
+  else if(g.status==='devolvido')aviso=`<div class="note bad"><b>Devolvido para ajuste</b> por ${esc(g.decididoPor)} em ${fmtDH(g.decididoEm)}: ${esc(g.comentario)}</div>`;
+  else if(g.status==='aprovado')aviso=`<div class="note info">Gate aprovado por ${esc(g.decididoPor)} em ${fmtDH(g.decididoEm)}.</div>`;
+  let conteudo='';
+  if(sec==='ELEG')conteudo=elegibilidadeHtml(p);
+  else conteudo=`<section class="panel"><h2>${ETAPA_NOME[sec]}</h2><div class="form">${CAMPOS[sec].map(x=>campoHtml(p,x,ed)).join('')}</div></section>${sec==='FSP'?cronogramaFspHtml(p,ed):''}${sec==='FSP'?`<section class="panel"><h2>Distribuição anual calculada</h2>${capexGrid(p,false)}</section>`:''}`;
+  return `${aviso}<div class="stack">${conteudo}${ed&&sec!=='ELEG'?botoesSalvar():''}${acoesGateEtapa(p,sec)}</div>`;
+}
+function etapaPill(label,status){
+  const cls={aprovado:'b-eleg',liberado_para_envio:'b-eleg',enviado:'b-mat',em_analise:'b-mat',em_aprovacao:'b-mat',em_aprovacao_envio:'b-mat',devolvido:'b-risk',devolvido_para_ajuste:'b-risk',em_analise_engenharia:'b-mat',pronto_para_publicacao:'b-eleg'}[status]||'b-neutral';
+  const nomes={aprovado:'Aprovado',liberado_para_envio:'Liberado para envio',enviado:'Aguardando aprovação PQQ',em_analise:'Em análise no PQQ',em_aprovacao:'Aguardando aprovação',em_aprovacao_envio:'Aguardando aprovação',devolvido:'Devolvido',devolvido_para_ajuste:'Devolvido para ajuste',em_analise_engenharia:'Em análise da Engenharia',pronto_para_publicacao:'Pronto para publicação na PMP'};
+  return `<span class="badge ${cls}">${esc(label)} · ${esc(nomes[status]||status||'Não iniciado')}</span>`;
+}
+function abaFluxo(p){
+  const pp=p.pqq||{}, ap=pp.aprovacao_envio||{}, ret=pp.retorno||{}, tap=p.tap||{}, prop=tap.proposta||{}, pmp=p.pmp||{};
+  const elegAprovada=(p.gates&&p.gates.ELEG&&p.gates.ELEG.status==='aprovado');
+  const podePreparar=['validador','pmo'].includes(USER.perfil);
+  const podeExecutivo=['gerente_executivo','pmo'].includes(USER.perfil);
+  const podeRevisar=['validador','pmo'].includes(USER.perfil)&&ret.status==='aprovado'&&['em_analise_engenharia','devolvido'].includes(tap.status);
+  const curva=ret.curva_mensal||{};const meses=Object.keys(curva).sort();
+  const docs=p.documentos||[];const tapDoc=docs.find(d=>d.id===pmp.tap_documento_id||d.tipo==='TAP');
+  const pdfHref=tapDoc&&tapDoc.arquivo?appUrl('/api/arquivos/'+encodeURIComponent(tapDoc.arquivo)):'';
+  let primeiro='';
+  if(!elegAprovada)primeiro='<div class="note">O envio ao PQQ é liberado depois da aprovação da Elegibilidade.</div>';
+  else if(!pp.status&&podePreparar)primeiro='<button class="btn primary" id="solPqqApr">Solicitar aprovação do Gerente Executivo</button>';
+  else if(pp.status==='em_aprovacao_envio')primeiro=`<div class="note info">Ainda não enviado ao PQQ: aguardando aprovação do Gerente Executivo dentro da Originação.</div>${podeExecutivo?'<div class="row" style="margin-top:12px"><button class="btn ok" id="aprPqqEnvio">Aprovar envio ao PQQ</button><button class="btn bad" id="devPqqEnvio">Devolver para ajuste</button></div>':''}`;
+  else if(pp.status==='liberado_para_envio')primeiro='<div class="note info">Aprovado pelo Gerente Executivo. O projeto está disponível para envio individual ou em lote na tela Integração PQQ / PMP.</div>';
+  else if(pp.status==='enviado'&&ret.status!=='em_analise')primeiro=`<div class="note info">Enviado no lote <b>${esc((pp.envio||{}).lote_id||'')}</b>. Aguardando retorno do PQQ em lote.</div>`;
+  else if(pp.status==='devolvido_para_ajuste')primeiro=`<div class="note bad">Devolvido pelo Gerente Executivo: ${esc(ap.comentario||'Ajuste solicitado.')}</div><button class="btn" id="rePqqApr">Reenviar para aprovação</button>`;
+  else if(ret.status==='devolvido')primeiro=`<div class="note bad">O PQQ devolveu o projeto. ${esc(ret.comentario||'Verifique o motivo no retorno do lote.')}</div>`;
+  else if(ret.status==='em_analise')primeiro='<div class="note info">O PQQ recebeu o projeto e ainda está em análise.</div>';
+  else if(ret.status==='aprovado')primeiro=`<div class="note info">O orçamento retornado pelo PQQ está aprovado e disponível para a análise da Engenharia. Lote ${esc(ret.lote_id||'')}.</div>`;
+  else primeiro='<p class="muted">Aguardando preparação da etapa de envio ao PQQ.</p>';
+  let engenharia='';
+  if(ret.status==='aprovado'){
+    engenharia=`<section class="panel"><h3>Orçamento aprovado pelo PQQ</h3><div class="summary-cards">
+      <div class="summary-card"><span class="meta">Orçamento total</span><div class="sv">${fmtMi(ret.orcamento_total)}</div></div>
+      <div class="summary-card"><span class="meta">ID PQQ</span><div class="sv">${esc(ret.pqq_id||'—')}</div></div>
+      <div class="summary-card"><span class="meta">Aprovado por</span><div class="sv">${esc(ret.aprovado_por||'—')}</div></div>
+    </div><p class="meta">Valores financeiros recebidos do PQQ são somente para consulta. A Engenharia ajusta apenas escopo e cronograma.</p>
+    <h3>Curva financeira mensal aprovada · somente leitura</h3>
+    <div class="tablewrap"><table><thead><tr><th>Mês</th><th class="num">Valor aprovado</th></tr></thead><tbody>${meses.map(m=>`<tr><td>${esc(m)}</td><td class="num">${fmtMi(curva[m])}</td></tr>`).join('')||'<tr><td colspan="2">Curva mensal não informada.</td></tr>'}</tbody></table></div>
+    <h3 style="margin-top:20px">Revisão da Engenharia</h3><p class="meta">Ajuste escopo e cronograma para compatibilizar o projeto com a curva aprovada. Não é possível editar valores financeiros nesta tela.</p>
+    <label class="field full"><span>Escopo proposto para o TAP</span><textarea data-tapf="escopo" ${podeRevisar?'':'disabled'}>${esc(prop.escopo||'')}</textarea></label>
+    <label class="field full" style="margin-top:12px"><span>Cronograma proposto para o TAP</span><textarea data-tapf="cronograma" ${podeRevisar?'':'disabled'}>${esc(prop.cronograma||'')}</textarea></label>
+    <div class="form" style="margin-top:12px"><label class="field"><span>Início planejado</span><input type="date" data-tapf="inicio_previsto" value="${esc(prop.inicio_previsto||'')}" ${podeRevisar?'':'disabled'}></label><label class="field"><span>Conclusão compromissada</span><input type="date" data-tapf="conclusao_compromissada" value="${esc(prop.conclusao_compromissada||'')}" ${podeRevisar?'':'disabled'}></label></div>
+    <label class="field full" style="margin-top:12px"><span>Premissas e restrições essenciais</span><textarea data-tapf="premissas" ${podeRevisar?'':'disabled'}>${esc(prop.premissas||'')}</textarea></label>
+    ${podeRevisar?`<div class="row" style="margin-top:14px"><button class="btn" id="salvarTapProp">Salvar revisão da Engenharia</button><button class="btn primary" id="enviarTapApr">Enviar TAP para aprovação do Gerente Executivo</button></div>`:''}
+    ${tap.status==='em_aprovacao'?`<div class="note info" style="margin-top:16px">A TAP está aguardando decisão do Gerente Executivo nesta ferramenta. O orçamento e a curva aprovados pelo PQQ permanecem bloqueados.</div>${podeExecutivo?'<div class="row" style="margin-top:12px"><button class="btn ok" id="aprTap">Aprovar TAP</button><button class="btn bad" id="devTap">Devolver à Engenharia</button></div>':''}`:''}
+    ${tap.status==='devolvido'?`<div class="note bad" style="margin-top:16px">TAP devolvido por ${esc(tap.decidido_por||'')}: ${esc(tap.comentario||'')}</div>`:''}
+    ${tap.status==='aprovado'?`<div class="note info" style="margin-top:16px"><b>TAP aprovada.</b> O projeto e o formulário PDF seguem automaticamente para a carteira da PMP. ${pdfHref?`<a href="${esc(pdfHref)}" target="_blank" rel="noopener">Abrir formulário TAP em PDF</a>`:''}</div><p class="meta">Situação PMP: ${esc((pmp.status||'').replaceAll('_',' '))}.</p>`:''}
+    </section>`;
+  } else if(['enviado','em_analise'].includes(pp.status)) engenharia='<div class="panel empty-state"><h3>Aguardando retorno aprovado do PQQ</h3><p>O retorno é recebido por lote e será associado ao projeto pelo ID mestre.</p></div>';
+  return `<h1>PQQ e TAP</h1><p class="lede">Continuidade do projeto após a elegibilidade, com aprovação executiva, integração com o PQQ, revisão da Engenharia e formalização para a PMP.</p>
+    <div class="stack"><section class="panel"><div class="row"><h2 style="margin:0">1 · Aprovação e envio ao PQQ</h2><span class="spacer"></span>${etapaPill('PQQ',pp.status)}</div>${primeiro}</section>
+    ${engenharia||'<section class="panel"><h2>2 · Retorno do PQQ e TAP</h2><p class="muted">Esta etapa será liberada quando o PQQ retornar o orçamento aprovado no lote.</p></section>'}
+    ${pmp.status==='pronto_para_publicacao'?'<section class="panel"><h2>3 · PMP e Tendência</h2><p>O TAP aprovado gera automaticamente um item na fila de publicação da PMP. A Tendência será alimentada a partir da PMP.</p></section>':''}</div>`;
+}
+function abaValidacoes(p){
+  const log=(p.validacoes||[]).slice().reverse();const ex=p.extra||{};const idx=IDX[p.estagio];const podePedirExtra=podeEditar(p,USER)&&idx>=1&&p.status==='Ativo';const podeDecidirExtra=ex.status==='solicitado'&&(isPMO(USER)||(USER.perfil==='gestor'&&USER.unidade===p.unidade));const exEd=podePedirExtra&&(!ex.status||ex.status==='rascunho'||ex.status==='reprovado');
+  return `<div class="stack"><section class="panel"><h2>Histórico de validações</h2><p class="muted" style="margin-top:0">As ações de aprovar, devolver e enviar para validação ficam dentro da própria etapa. Esta tela é apenas de acompanhamento e rastreabilidade.</p>${log.length?`<div class="tablewrap"><table class="hist"><thead><tr><th>Quando</th><th>Quem</th><th>Gate</th><th>Ação</th><th>Comentário</th></tr></thead><tbody>${log.map(v=>`<tr><td>${fmtDH(v.em)}</td><td>${esc(v.por)}<div class="pid">${esc(v.perfil)}</div></td><td>${esc(ETAPA_NOME[v.gate]||v.gate)}</td><td>${esc(v.acao)}</td><td>${esc(v.comentario||'')}</td></tr>`).join('')}</tbody></table></div>`:'<p class="muted">Nenhuma validação registrada ainda.</p>'}</section>
+  <section class="panel"><h2>Rota extraordinária</h2><p class="muted">Projetos que precisem entrar no ciclo vigente como não orçados podem seguir por esta rota.</p><div class="row"><b>Caminho atual:</b> ${p.caminho==='extraordinario'?'Extraordinário':'Regular'}<span class="spacer"></span>${podePedirExtra&&p.caminho==='regular'?'<button class="btn" id="toExtra">Solicitar rota extraordinária</button>':''}${podeEditar(p,USER)&&p.caminho==='extraordinario'&&ex.status!=='aprovado'&&ex.status!=='solicitado'?'<button class="btn" id="toRegular">Voltar ao caminho regular</button>':''}</div>
+  ${p.caminho==='extraordinario'?`<div class="form" style="margin-top:14px">${[['extra.motivo','Motivo','area'],['extra.justificativa','Justificativa','area'],['extra.urgencia','Urgência','sel:URG'],['extra.capex','CAPEX não orçado no ciclo vigente (R$)','num']].map(x=>campoHtml(p,x,exEd)).join('')}</div><div class="row" style="margin-top:14px">${exEd?'<button class="btn" id="saveExtra">Salvar dados</button><button class="btn primary" id="sendExtra">Enviar para aprovação</button>':''}${podeDecidirExtra?'<button class="btn ok" id="aprExtra">Aprovar rota extraordinária</button><button class="btn bad" id="repExtra">Reprovar</button>':''}${isPMO(USER)&&ex.status==='aprovado'&&ex.envioTendencia!=='enviado'?'<button class="btn primary" id="tendExtra">Marcar como enviado para Tendência</button>':''}</div>`:''}</section></div>`;
+}
+function abaDocumentos(p){
+  const docs=p.documentos||[];const ed=podeEditar(p,USER)||USER.perfil==='validador';
+  return `<div class="stack"><section class="panel"><h2>Documentos do projeto</h2>
+   ${docs.length?`<ul class="list-plain">${docs.map(d=>{const href=d.arquivo?appUrl('/api/arquivos/'+encodeURIComponent(d.arquivo)):(/^https?:\/\//i.test(d.url||'')?d.url:'');
+     return `<li><span class="badge b-neutral">${esc(d.tipo)}</span>${href?`<a href="${esc(href)}" target="_blank" rel="noopener noreferrer">${esc(d.nome)}</a>`:`<span>${esc(d.nome)}</span>`}
+     <span class="spacer"></span><span class="meta">${esc(d.por)} · ${fmtData(d.em)}</span>${(isPMO(USER)||d.por===USER.nome)?`<button class="btn small" data-rmdoc="${esc(d.id)}">Remover</button>`:''}</li>`;}).join('')}</ul>`
+   :'<p class="muted">Nenhum documento anexado. Registre aqui FSE, Business Case, FSP, estimativas, cronogramas, estudos e aprovações.</p>'}
+  </section>
+  ${ed?`<section class="panel"><h2>Adicionar documento</h2><div class="form">
+   <label class="field"><span>Tipo</span><select id="docTipo">${opts(DOC_TIPOS,'')}</select></label>
+   <label class="field"><span>Nome</span><input type="text" id="docNome" placeholder="Ex.: Estimativa classe 4 rev. B"></label>
+   <label class="field full"><span>Link (SharePoint, Unifier…)</span><input type="url" id="docUrl" placeholder="https://"></label>
+   <label class="field full"><span>Ou envie o arquivo (até 20 MB)</span><input type="file" id="docFile" accept=".pdf,.png,.jpg,.jpeg,.csv,.txt,.md,.json,.docx,.xlsx,.xlsm,.pptx,.zip,.msg,.dwg"></label>
+  </div><div class="row" style="margin-top:14px"><button class="btn primary" id="addDoc">Adicionar documento</button></div>
+  <p class="meta">Arquivos ficam na pasta data/arquivos do servidor.</p></section>`:''}</div>`;
+}
+function fmtHistVal(campo,v){if(vazio(v))return '—';if(campo&&(campo.startsWith('CAPEX')||campo.includes('R$ mil')))return fmtMil(v);if(campo==='Ciclo PQQ pretendido'&&S.ciclos.get(v))return S.ciclos.get(v).nome;return String(v);}
+function abaHistorico(p){
+  const h=(p.hist||[]).slice().reverse();
+  return `<section class="panel"><h2>Histórico de alterações</h2>
+  ${h.length?`<div class="tablewrap"><table class="hist"><thead><tr><th>Quando</th><th>Quem</th><th>Ação</th><th>Campo</th><th>Alteração</th><th>Justificativa / comentário</th></tr></thead><tbody>
+  ${h.map(e=>`<tr><td style="white-space:nowrap">${fmtDH(e.em)}</td><td>${esc(e.por)}<div class="pid">${esc(e.perfil)}</div></td><td>${esc(e.acao)}</td><td>${esc(e.campo||'')}</td>
+   <td>${e.de!==undefined&&e.acao==='Alteração'?`<span class="de">${esc(fmtHistVal(e.campo,e.de))}</span> → ${esc(fmtHistVal(e.campo,e.para))}`:esc(e.para||'')}</td><td>${esc(e.justificativa||'')}</td></tr>`).join('')}
+  </tbody></table></div>`:'<p class="muted">Sem registros.</p>'}</section>`;
+}
+
+/* ============ Ações da ficha ============ */
+function coletar(p,scope){
+  const novo=clone(p);const mud=[];
+  (scope||document).querySelectorAll('[data-f]').forEach(el=>{
+    const f=el.dataset.f;let v=el.value;
+    if(el.dataset.t==='num')v=v===''?null:Number(v);else v=v.trim();
+    const old=getP(p,f);
+    const a=vazio(old)?'':String(old),b=vazio(v)?'':String(v);
+    if(a!==b){setP(novo,f,v);mud.push({campo:f,de:vazio(old)?'':old,para:vazio(v)?'':v});}
+  });
+  const rows=(scope||document).querySelectorAll('[data-ai]');
+  if(rows.length){const atividades=[...rows].map(tr=>{const o={};tr.querySelectorAll('[data-af]').forEach(el=>{let v=el.value;if(el.dataset.af==='custo')v=v===''?0:Number(v);o[el.dataset.af]=v;});return o;}).filter(a=>a.nome||a.inicio||a.fim||a.custo);const old=JSON.stringify((p.fsp&&p.fsp.atividades)||[]);if(JSON.stringify(atividades)!==old){novo.fsp=novo.fsp||{};novo.fsp.atividades=atividades;const dist=gerarDistribuicao(atividades);novo.fsp.distribuicaoMensal=dist.mensal;novo.capexAno=dist.anual;novo.capexEstimado=Object.values(dist.anual).reduce((a,b)=>a+Number(b||0),0);mud.push({campo:'fsp.atividades',de:'Cronograma anterior',para:atividades.length+' atividades'});}}
+  const eapSel=(scope||document).querySelector('#eapSel');if(eapSel){const old=getP(p,'fsp.eapId')||'';if(old!==eapSel.value){novo.fsp=novo.fsp||{};novo.fsp.eapId=eapSel.value;mud.push({campo:'fsp.eapId',de:old,para:eapSel.value});}}
+  if(novo.capexAno)Object.keys(novo.capexAno).forEach(k=>{if(vazio(novo.capexAno[k]))delete novo.capexAno[k];});
+  return {novo,mud};
+}
+async function salvarEdicao(p){
+  const {novo,mud}=coletar(p);
+  if(!mud.length){toast('Nenhuma alteração para salvar.');return;}
+  const neg=mud.find(m=>typeof m.para==='number'&&m.para<0);
+  if(neg){toast('Valores de CAPEX não podem ser negativos.');return;}
+  const critica=mud.some(m=>CRITICOS.some(c=>m.campo===c||m.campo.startsWith(c+'.')));
+  let just='';
+  if(critica&&p.gates[p.estagio]?.status==='aprovado'){
+    just=await pedirTexto('Justifique a alteração','Este projeto já tem Gate aprovado. Mudanças em CAPEX, escopo, cronograma, status ou ciclo ficam registradas com justificativa.');
+    if(just===null)return;
+  }
+  const atual=S.projetos.get(p.id);
+  const base=atual&&atual.atualizadoEm!==p.atualizadoEm?coletar(atual).novo:novo;
+  mud.forEach(m=>addHist(base,{acao:'Alteração',campo:rotulo(m.campo),de:m.de,para:m.para,justificativa:just}));
+  base.atualizadoEm=nowIso();
+  S.editing=false;
+  await salvarProjeto(base,mud.length===1?'Alteração salva.':mud.length+' alterações salvas.');
+  render();
+}
+async function enviarGate(p,g){
+  const f=faltando(p,g);if(f.length){toast('Faltam dados: '+f.join(', '));return;}
+  if(S.editing){toast('Salve ou descarte as alterações antes de enviar.');return;}
+  const n=clone(p);const t=nowIso();
+  n.gates[g]=Object.assign({},n.gates[g],{status:'em_validacao',enviadoPor:USER.nome,enviadoEm:t});
+  (n.validacoes=n.validacoes||[]).push({em:t,por:USER.nome,perfil:PERFIL[USER.perfil],gate:g,acao:'Enviado para validação',comentario:''});
+  addHist(n,{acao:'Enviado para validação',campo:'Gate '+ETAPA_NOME[g],de:'',para:''});
+  n.atualizadoEm=t;
+  await salvarProjeto(n,'Gate '+ETAPA_NOME[g]+' enviado para validação.');render();
+}
+async function decidirGate(p,g,aprovar){
+  const com=await pedirTexto(aprovar?'Aprovar Gate '+ETAPA_NOME[g]:'Devolver para ajuste',aprovar?'Comentário opcional sobre a aprovação.':'Explique o que precisa ser ajustado. O solicitante verá este comentário.',!aprovar);
+  if(com===null)return;
+  const n=clone(S.projetos.get(p.id));const t=nowIso();
+  if(n.gates[g].status!=='em_validacao'){toast('Este Gate já foi decidido por outra pessoa.');render();return;}
+  n.gates[g]=Object.assign({},n.gates[g],{status:aprovar?'aprovado':'devolvido',decididoPor:USER.nome,decididoEm:t,comentario:com});
+  n.validacoes.push({em:t,por:USER.nome,perfil:PERFIL[USER.perfil],gate:g,acao:aprovar?'Aprovado':'Devolvido para ajuste',comentario:com});
+  addHist(n,{acao:aprovar?'Gate aprovado':'Gate devolvido',campo:'Gate '+ETAPA_NOME[g],de:'',para:'',justificativa:com});
+  if(aprovar){const prox=['FSE','BC','FSP','ELEG','MADURO'][IDX[g]+1];addHist(n,{acao:'Alteração',campo:'Estágio',de:ETAPA_NOME[n.estagio],para:ETAPA_NOME[prox]});n.estagio=prox;}
+  n.atualizadoEm=t;
+  await salvarProjeto(n,aprovar?'Gate aprovado. Projeto avançou para '+ETAPA_NOME[n.estagio]+'.':'Projeto devolvido para ajuste.');render();
+}
+async function atualizarExtra(p,muda,acao,com){
+  const n=clone(S.projetos.get(p.id));const t=nowIso();
+  muda(n,t);
+  addHist(n,{acao,campo:'Rota extraordinária',de:'',para:'',justificativa:com||''});
+  n.atualizadoEm=t;S.editing=false;
+  await salvarProjeto(n,acao+'.');render();
+}
+function bindProjeto(p,aba){
+  const main=$('#main');
+  main.querySelectorAll('[data-f]').forEach(el=>el.addEventListener('input',()=>{S.editing=true;}));
+  main.querySelectorAll('[data-tapf]').forEach(el=>el.addEventListener('input',()=>{S.editing=true;}));
+  const sb=$('#saveBtn');if(sb)sb.onclick=()=>salvarEdicao(p);
+  const cb=$('#cancelBtn');if(cb)cb.onclick=()=>{S.editing=false;render();};
+  main.querySelectorAll('[data-enviar]').forEach(b=>b.onclick=()=>enviarGate(p,b.dataset.enviar));
+  main.querySelectorAll('[data-aprovar]').forEach(b=>b.onclick=()=>decidirGate(p,b.dataset.aprovar,true));
+  main.querySelectorAll('[data-devolver]').forEach(b=>b.onclick=()=>decidirGate(p,b.dataset.devolver,false));
+  const on=(id,fn)=>{const e=document.getElementById(id);if(e)e.onclick=fn;};
+  const atualizarFluxo=async(url,body,msg)=>{try{await api('POST',url,body);S.editing=false;await carregar();toast(msg);render();}catch(e){toast(e.message||'Não foi possível atualizar o fluxo.');}};
+  const enviarPqqApr=async()=>{
+    const c=await pedirTexto('Solicitar aprovação executiva','O Gerente Executivo avaliará esta solicitação dentro da Originação, antes do envio ao PQQ. Comentário opcional.',false);if(c===null)return;
+    try{await api('POST','/api/projetos/'+encodeURIComponent(p.id)+'/pqq/enviar-aprovacao',{comentario:c});await carregar();toast('Solicitação registrada na fila interna de aprovação da Originação.');render();}catch(e){toast(e.message||'Não foi possível solicitar aprovação.');}
+  };
+  on('solPqqApr',enviarPqqApr);on('rePqqApr',enviarPqqApr);
+  on('aprPqqEnvio',async()=>{const c=await pedirTexto('Aprovar envio ao PQQ','A aprovação libera este projeto para envio individual ou em lote ao PQQ. Comentário opcional.',false);if(c===null)return;
+    await atualizarFluxo('/api/projetos/'+encodeURIComponent(p.id)+'/pqq/decidir-envio',{decisao:'aprovar',comentario:c},'Aprovado. Projeto liberado para o PQQ.');});
+  on('devPqqEnvio',async()=>{const c=await pedirTexto('Devolver envio ao PQQ','Explique o que precisa ser ajustado antes da aprovação.',true);if(c===null)return;
+    await atualizarFluxo('/api/projetos/'+encodeURIComponent(p.id)+'/pqq/decidir-envio',{decisao:'devolver',comentario:c},'Devolvido para ajuste.');});
+  const salvarTap=async()=>{
+    const escopo=main.querySelector('[data-tapf="escopo"]')?.value.trim()||'';
+    const cronograma=main.querySelector('[data-tapf="cronograma"]')?.value.trim()||'';
+    const inicio_previsto=main.querySelector('[data-tapf="inicio_previsto"]')?.value||'';
+    const conclusao_compromissada=main.querySelector('[data-tapf="conclusao_compromissada"]')?.value||'';
+    const premissas=main.querySelector('[data-tapf="premissas"]')?.value.trim()||'';
+    if(!escopo||!cronograma||!inicio_previsto||!conclusao_compromissada){toast('Preencha escopo, cronograma, início planejado e conclusão compromissada.');return false;}
+    try{await api('PUT','/api/projetos/'+encodeURIComponent(p.id)+'/tap/proposta',{escopo,cronograma,inicio_previsto,conclusao_compromissada,premissas});S.editing=false;await carregar();return true;}
+    catch(e){toast(e.message||'Não foi possível salvar a revisão.');return false;}
+  };
+  on('salvarTapProp',async()=>{if(await salvarTap()) {toast('Revisão da Engenharia salva.');render();}});
+  on('enviarTapApr',async()=>{if(!await salvarTap())return;try{await api('POST','/api/projetos/'+encodeURIComponent(p.id)+'/tap/enviar-aprovacao',{});await carregar();toast('TAP encaminhado à aprovação executiva dentro da Originação.');render();}catch(e){toast(e.message||'Não foi possível encaminhar a TAP.');}});
+  on('aprTap',async()=>{const c=await pedirTexto('Aprovar TAP','A aprovação formaliza a condição do projeto e o encaminha à fila da PMP. Comentário opcional.',false);if(c===null)return;
+    try{await api('POST','/api/projetos/'+encodeURIComponent(p.id)+'/tap/decidir',{decisao:'aprovar',comentario:c});S.editing=false;await carregar();toast('TAP aprovada; projeto encaminhado automaticamente à carteira da PMP.');render();}catch(e){toast(e.message||'Não foi possível concluir a publicação do TAP. Confira a integração.');}});
+  on('devTap',async()=>{const c=await pedirTexto('Devolver TAP para ajuste','Explique o que a Engenharia precisa ajustar no escopo ou cronograma.',true);if(c===null)return;
+    await atualizarFluxo('/api/projetos/'+encodeURIComponent(p.id)+'/tap/decidir',{decisao:'devolver',comentario:c},'TAP devolvido para ajuste.');});
+  on('toExtra',()=>atualizarExtra(p,n=>{n.caminho='extraordinario';n.extra=Object.assign({status:'rascunho',urgencia:'Alta'},n.extra||{},{status:'rascunho'});},'Rota extraordinária iniciada'));
+  on('toRegular',()=>atualizarExtra(p,n=>{n.caminho='regular';},'Retorno ao caminho regular'));
+  const saveExtraData=async()=>{const {novo,mud}=coletar(p,main);if(!mud.length)return S.projetos.get(p.id);mud.forEach(m=>addHist(novo,{acao:'Alteração',campo:{'extra.motivo':'Extraordinário · Motivo','extra.justificativa':'Extraordinário · Justificativa','extra.urgencia':'Extraordinário · Urgência','extra.capex':'CAPEX não orçado (R$)'}[m.campo]||m.campo,de:m.de,para:m.para}));novo.atualizadoEm=nowIso();S.editing=false;await salvarProjeto(novo);return novo;};
+  on('saveExtra',async()=>{await saveExtraData();toast('Dados da rota extraordinária salvos.');render();});
+  on('sendExtra',async()=>{const n=await saveExtraData();const e=n.extra||{};const miss=[['motivo','motivo'],['justificativa','justificativa'],['capex','CAPEX']].filter(([k])=>vazio(e[k])).map(x=>x[1]);
+    if(miss.length){toast('Preencha: '+miss.join(', ')+'.');render();return;}
+    await atualizarExtra(n,x=>{x.extra.status='solicitado';x.extra.solicitadoPor=USER.nome;},'Rota extraordinária enviada para aprovação');});
+  on('aprExtra',async()=>{const c=await pedirTexto('Aprovar rota extraordinária','Registre a aprovação extraordinária (ata, e-mail ou decisão).');if(c===null)return;
+    await atualizarExtra(p,(x,t)=>{Object.assign(x.extra,{status:'aprovado',decididoPor:USER.nome,decididoEm:t,comentario:c,envioTendencia:'pendente'});},'Rota extraordinária aprovada',c);});
+  on('repExtra',async()=>{const c=await pedirTexto('Reprovar rota extraordinária','Explique o motivo.');if(c===null)return;
+    await atualizarExtra(p,(x,t)=>{Object.assign(x.extra,{status:'reprovado',decididoPor:USER.nome,decididoEm:t,comentario:c});},'Rota extraordinária reprovada',c);});
+  on('tendExtra',()=>atualizarExtra(p,(x,t)=>{x.extra.envioTendencia='enviado';x.extra.enviadoTendenciaEm=t;},'Enviado para Tendência'));
+  on('saveCycleEleg',async()=>{const cycle=$('#cycleElegSel')?.value;if(!cycle||!S.ciclos.has(cycle)){toast('Selecione um ciclo PQQ cadastrado.');return;}const n=clone(S.projetos.get(p.id));if(n.cicloId===cycle){toast('Ciclo já confirmado.');return;}const old=n.cicloId||'';n.cicloId=cycle;addHist(n,{acao:'Alteração',campo:'Ciclo PQQ pretendido',de:old,para:cycle});n.atualizadoEm=nowIso();try{await salvarProjeto(n,'Ciclo PQQ confirmado.');S.editing=false;render();}catch(e){toast(e.message||'Não foi possível salvar o ciclo.');}});
+  on('matBtn',async()=>{const v=$('#matSel').value;const n=clone(S.projetos.get(p.id));if((n.maturidadeManual||'')===v)return;
+    const j=await pedirTexto('Alterar maturidade','Justifique a classificação manual.');if(j===null)return;
+    addHist(n,{acao:'Alteração',campo:'Maturidade (manual)',de:n.maturidadeManual||'Automática',para:v||'Automática',justificativa:j});n.maturidadeManual=v;n.atualizadoEm=nowIso();
+    await salvarProjeto(n,'Maturidade atualizada.');render();});
+  on('loadEap',()=>{const id=$('#eapSel').value;if(!id||!EAPS[id]){toast('Selecione uma EAP padrão.');return;}const tbody=$('#atividadeBody');tbody.innerHTML=EAPS[id].atividades.map((nome,i)=>`<tr data-ai="${i}"><td><input type="text" data-af="nome" value="${esc(nome)}"></td><td><input type="date" data-af="inicio"></td><td><input type="date" data-af="fim"></td><td><input class="money" type="number" step="0.01" min="0" data-af="custo"></td><td><button class="btn small bad" data-rmact="${i}">Remover</button></td></tr>`).join('');S.editing=true;bindActRem();});
+  on('addAct',()=>{const tbody=$('#atividadeBody');if(tbody.querySelector('td.muted'))tbody.innerHTML='';const i=tbody.querySelectorAll('[data-ai]').length;tbody.insertAdjacentHTML('beforeend',`<tr data-ai="${i}"><td><input type="text" data-af="nome"></td><td><input type="date" data-af="inicio"></td><td><input type="date" data-af="fim"></td><td><input class="money" type="number" step="0.01" min="0" data-af="custo"></td><td><button class="btn small bad" data-rmact="${i}">Remover</button></td></tr>`);S.editing=true;bindActRem();});
+  function bindActRem(){main.querySelectorAll('[data-rmact]').forEach(b=>b.onclick=()=>{b.closest('tr').remove();S.editing=true;});main.querySelectorAll('[data-af],#eapSel').forEach(el=>el.oninput=()=>S.editing=true);}
+  bindActRem();
+  const atualizarResumoFsp=()=>{const t=[...main.querySelectorAll('[data-af="custo"]')].reduce((v,el)=>v+(Number(el.value)||0),0);const bc=Number(p.bc?.capexInicial)||0;const sum=$('#fspAllocated'),diff=$('#fspBalance');if(sum)sum.textContent=fmtMi(t);if(diff){diff.textContent=fmtMi(bc-t);diff.style.color=t>bc?'#b42318':'';}};
+  main.querySelectorAll('[data-af="custo"]').forEach(el=>el.addEventListener('input',atualizarResumoFsp));
+  const tbodyWatch=main.querySelector('#atividadeBody');if(tbodyWatch){const obs=new MutationObserver(()=>{main.querySelectorAll('[data-af="custo"]').forEach(el=>{if(!el.dataset.sumBound){el.addEventListener('input',atualizarResumoFsp);el.dataset.sumBound='1';}});atualizarResumoFsp();});obs.observe(tbodyWatch,{childList:true,subtree:true});}atualizarResumoFsp();
+  on('addDoc',async()=>{
+    const tipo=$('#docTipo').value,nome=$('#docNome').value.trim(),url=$('#docUrl').value.trim();const file=$('#docFile')&&$('#docFile').files[0];
+    if(!nome&&!file){toast('Dê um nome ao documento.');return;}
+    if(!file&&!/^https?:\/\//i.test(url)){toast('Informe um link começando com https:// ou envie um arquivo.');return;}
+    const b=$('#addDoc');b.disabled=true;
+    const d={id:Math.random().toString(36).slice(2,10),tipo,nome:nome||(file&&file.name),url:file?'':url,por:USER.nome,em:nowIso()};
+    try{
+      if(file){b.textContent='Enviando…';const fd=new FormData();fd.append('arquivo',file);const r=await api('POST','/api/projetos/'+encodeURIComponent(p.id)+'/arquivos',fd,true);d.arquivo=r.arquivo;}
+      const n=clone(S.projetos.get(p.id));(n.documentos=n.documentos||[]).push(d);
+      addHist(n,{acao:'Documento anexado',campo:tipo,de:'',para:d.nome});n.atualizadoEm=nowIso();
+      await salvarProjeto(n,'Documento adicionado.');render();
+    }catch(e){toast('Não foi possível adicionar o documento: '+(e&&e.message||'erro'));b.disabled=false;b.textContent='Adicionar documento';}
+  });
+  main.querySelectorAll('[data-rmdoc]').forEach(b=>b.onclick=async()=>{
+    const n=clone(S.projetos.get(p.id));const d=(n.documentos||[]).find(x=>x.id===b.dataset.rmdoc);if(!d)return;
+    n.documentos=n.documentos.filter(x=>x.id!==d.id);addHist(n,{acao:'Documento removido',campo:d.tipo,de:'',para:d.nome});n.atualizadoEm=nowIso();
+    await salvarProjeto(n,'Documento removido.');render();
+  });
+}
+
+/* ============ Pendências ============ */
+function viewFila(){
+  const f=fila();
+  return `<h1>Minhas pendências</h1><p class="lede">O que depende de ${esc(USER.nome)} como ${esc(PERFIL[USER.perfil])}${USER.unidade?' da '+esc(USER.unidade):''}.</p>
+  ${f.length?`<div class="tablewrap"><table><thead><tr><th>Projeto</th><th>Unidade</th><th>O que fazer</th><th class="num">CAPEX</th><th>Desde</th></tr></thead><tbody>
+  ${f.map(x=>{const g=GATES.find(k=>x.tipo.includes(ETAPA_NOME[k]));const desde=g?(x.p.gates[g].enviadoEm||x.p.gates[g].decididoEm):x.p.atualizadoEm;
+    return `<tr class="click" onclick="location.hash='#/projeto/${encodeURIComponent(x.p.id)}/${x.aba}'"><td><div class="pname">${esc(x.p.nome)}</div><div class="pid">${esc(x.p.id)}</div></td><td>${esc(x.p.unidade)}</td><td><a href="#/projeto/${encodeURIComponent(x.p.id)}/${x.aba}">${esc(x.tipo)}</a></td><td class="num">${fmtMi(capexTotal(x.p))}</td><td>${fmtData(desde)}</td></tr>`;}).join('')}
+  </tbody></table></div>`:'<div class="panel empty-state"><h2>Nada pendente</h2><p>Quando um projeto aguardar sua validação ou precisar de ajuste, ele aparece aqui.</p><a class="btn" style="text-decoration:none" href="#/portfolio">Ver portfólio</a></div>'}`;
+}
+
+/* ============ Ciclos ============ */
+function viewCiclos(){
+  const cs=ciclosOrdenados();const t=new Date();const prox=proximoCiclo();
+  return `<h1>Ciclos PQQ</h1><p class="lede">O projeto continua sendo desenvolvido depois do corte. A data serve para avaliar se ele está apto ao ciclo.</p>
+  <div class="stack">
+  <div class="tablewrap"><table><thead><tr><th>Ciclo</th><th>Abertura</th><th>Corte</th><th>Período</th><th class="num">Projetos</th><th class="num">CAPEX</th><th>Situação</th>${isPMO(USER)?'<th></th>':''}</tr></thead><tbody>
+  ${cs.length?cs.map(c=>{const ps=[...S.projetos.values()].filter(p=>p.status!=='Cancelado'&&(cicloDo(p)||{}).id===c.id);
+    const sit=fimCorte(c)<t?'Encerrado':c===prox?(new Date(c.abertura+'T00:00:00')<=t?'Aberto · próximo corte':'Próximo corte'):'Futuro';
+    return `<tr><td class="pname">${esc(c.nome)}</td><td>${fmtData(c.abertura)}</td><td>${fmtData(c.corte)}</td><td>${c.inicio}–${c.fim}</td><td class="num">${ps.length}</td><td class="num">${fmtMi(ps.reduce((a,p)=>a+capexTotal(p),0))}</td>
+     <td><span class="badge ${sit==='Encerrado'?'b-neutral':sit.startsWith('Aberto')||sit==='Próximo corte'?'b-mat':'b-neutral'}">${sit}</span></td>${isPMO(USER)?`<td><button class="btn small" data-editc="${esc(c.id)}">Editar</button></td>`:''}</tr>`;}).join('')
+  :`<tr><td colspan="8" class="muted" style="text-align:center;padding:24px">Nenhum ciclo cadastrado.${isPMO(USER)?' Use o formulário abaixo.':' O PMO cadastra os ciclos.'}</td></tr>`}
+  </tbody></table></div>
+  ${isPMO(USER)?`<section class="panel" id="cicloPanel"><h2 id="cicloTitle">Cadastrar ciclo</h2><input type="hidden" id="cId"><div class="form">
+   <label class="field"><span>Nome</span><input type="text" id="cNome" placeholder="PQQ 2028–2032"></label>
+   <label class="field"><span>Data de abertura</span><input type="date" id="cAb"></label>
+   <label class="field"><span>Data de corte</span><input type="date" id="cCorte"></label>
+   <label class="field"><span>Ano inicial</span><input type="number" id="cIni" min="2020" max="2100"></label>
+   <label class="field"><span>Ano final</span><input type="number" id="cFim" min="2020" max="2100"></label>
+  </div><p id="cErr" style="color:var(--bad);font-size:14px;min-height:20px"></p>
+  <div class="row"><button class="btn primary" id="cSave">Salvar ciclo</button><button class="btn" id="cReset" hidden>Cancelar edição</button></div></section>`:''}
+  ${isPMO(USER)?`<section class="panel"><h2>Base de testes</h2><p class="muted" style="margin-top:0">Apaga todos os projetos, ciclos, históricos e arquivos deste servidor. Use para recomeçar um teste.</p><button class="btn bad" id="zerarBtn">Zerar base de testes</button></section>`:''}
+  <section class="panel"><h2>Como a maturidade é calculada</h2>
+   <p style="max-width:75ch;margin-top:0">Para cada projeto, a ferramenta compara os dias até o corte do ciclo pretendido com o tempo estimado para passar pelos Gates que faltam (${REGRA.diasPorGate} dias por Gate).</p>
+   <ul class="list-plain" style="max-width:75ch">
+    <li><span class="badge b-eleg">Elegível</span><span>Gate de Elegibilidade aprovado.</span></li>
+    <li><span class="badge b-mat">Em maturação</span><span>Tempo até o corte cobre com folga (30%) os Gates restantes.</span></li>
+    <li><span class="badge b-risk">Em risco</span><span>Tempo entre 70% e 130% do necessário, ou algum Gate devolvido.</span></li>
+    <li><span class="badge b-no">Não elegível</span><span>Tempo abaixo de 70% do necessário, corte já passou ou projeto cancelado.</span></li>
+   </ul><p class="meta">O PMO pode fixar a classificação manualmente na aba Validações do projeto.</p>
+  </section></div>`;
+}
+function bindCiclos(){
+  const z=$('#zerarBtn');if(z)z.onclick=async()=>{const t=await pedirTexto('Zerar base de testes','Digite ZERAR para confirmar. Esta ação não pode ser desfeita.');if(t===null)return;if(t.trim().toUpperCase()!=='ZERAR'){toast('Confirmação incorreta. Nada foi apagado.');return;}
+    try{await api('POST','/api/admin/zerar');await carregar();toast('Base de testes zerada.');location.hash='#/torre';render();}catch(e){toast('Não foi possível zerar: '+e.message);}};
+  const save=$('#cSave');if(!save)return;
+  const fill=c=>{$('#cId').value=c?c.id:'';$('#cNome').value=c?c.nome:'';$('#cAb').value=c?c.abertura:'';$('#cCorte').value=c?c.corte:'';$('#cIni').value=c?c.inicio:'';$('#cFim').value=c?c.fim:'';
+    $('#cicloTitle').textContent=c?'Editar '+c.nome:'Cadastrar ciclo';$('#cReset').hidden=!c;$('#cErr').textContent='';};
+  document.querySelectorAll('[data-editc]').forEach(b=>b.onclick=()=>{fill(S.ciclos.get(b.dataset.editc));$('#cicloPanel').scrollIntoView({behavior:'smooth',block:'start'});});
+  $('#cReset').onclick=()=>fill(null);
+  save.onclick=async()=>{
+    const c={id:$('#cId').value||('c-'+Math.random().toString(36).slice(2,9)),nome:$('#cNome').value.trim(),abertura:$('#cAb').value,corte:$('#cCorte').value,inicio:Number($('#cIni').value),fim:Number($('#cFim').value)};
+    const miss=[];if(!c.nome)miss.push('nome');if(!c.abertura)miss.push('abertura');if(!c.corte)miss.push('corte');if(!c.inicio||!c.fim)miss.push('período');
+    if(miss.length){$('#cErr').textContent='Preencha: '+miss.join(', ')+'.';return;}
+    if(c.corte<c.abertura){$('#cErr').textContent='A data de corte deve ser depois da abertura.';return;}
+    if(c.fim<c.inicio){$('#cErr').textContent='O ano final deve ser maior ou igual ao inicial.';return;}
+    try{await writeDoc('ciclos',c);toast('Ciclo salvo.');render();}catch(e){$('#cErr').textContent='Não foi possível salvar: '+(e.message||e);}
+  };
+}
+
+async function viewIntegracoes(){
+  const m=$('#main');
+  if(!isPMO(USER)){m.innerHTML='<h1>Integrações</h1><div class="note">A área de integração é restrita ao PMO.</div>';return;}
+  const hub=!!(META&&META.modo==='hub');
+  m.innerHTML='<h1>Integração PQQ / PMP</h1><p class="lede">Envio ao PQQ individual ou em lote, retorno em lote e publicação automática dos projetos com TAP aprovada na carteira PMP.</p><div class="panel">Carregando as filas de integração…</div>';
+  try{
+    if(hub){try{await api('POST','/api/integracoes/pmp/sincronizar');}catch(e){console.warn('Publicação pendente na PMP:',e.message);}}
+    const [lotes,pmp,pend]=await Promise.all([api('GET','/api/integracoes/pqq/lotes'),api('GET','/api/integracoes/pmp/fila'),
+      hub?api('GET','/api/integracoes/pqq/retornos/pendentes').catch(()=>[]):Promise.resolve([])]);
+    const publicados=pmp.filter(p=>(p.pmp||{}).status==='publicado').length;
+    const ps=[...S.projetos.values()];const prontos=ps.filter(p=>(p.pqq||{}).status==='liberado_para_envio');
+    const aguardando=ps.filter(p=>['enviado','em_analise'].includes((p.pqq||{}).status));
+    const semHub=hub?'':'<div class="note">Ferramenta em <b>modo isolado</b>: a troca automática com o PQQ e a PMP acontece quando ela está plugada no hub (Data Core). Aqui você pode importar o retorno por arquivo JSON.</div>';
+    m.innerHTML=`<h1>Integração PQQ / PMP</h1><p class="lede">Envio ao PQQ individual ou em lote, retorno em lote e publicação automática dos projetos com TAP aprovada na carteira PMP.</p>${semHub}
+      <section class="summary-cards"><div class="summary-card"><span class="meta">Liberados para PQQ</span><div class="sv">${prontos.length}</div></div><div class="summary-card"><span class="meta">Aguardando retorno PQQ</span><div class="sv">${aguardando.length}</div></div><div class="summary-card"><span class="meta">Retornos processados</span><div class="sv">${lotes.filter(x=>x.tipo==='PQQ_RETORNO').length}</div></div><div class="summary-card"><span class="meta">TAP aprovada · PMP</span><div class="sv">${pmp.length}</div></div></section>
+      <div class="stack">
+      <section class="panel"><div class="row"><h2 style="margin:0">Enviar projetos ao PQQ</h2><span class="spacer"></span><button class="btn primary" id="sendPqqBatch" ${prontos.length&&hub?'':'disabled'}>Enviar selecionados</button></div><p class="meta">A aprovação do Gerente Executivo libera cada projeto. Selecione um para envio individual ou vários para um lote. Cada projeto é publicado no Data Core do hub e o PQQ o recebe na sua carteira.</p>
+      <div class="tablewrap"><table><thead><tr><th><input type="checkbox" id="checkAllPqq" aria-label="Selecionar todos"></th><th>ID mestre</th><th>Projeto</th><th>Unidade</th><th>Ciclo</th><th class="num">CAPEX FSP de referência</th></tr></thead><tbody>${prontos.length?prontos.map(p=>`<tr><td><input type="checkbox" data-pqqsel="${esc(p.id)}"></td><td>${esc(p.id)}</td><td>${esc(p.nome)}</td><td>${esc(p.unidade||'')}</td><td>${esc((S.ciclos.get(p.cicloId)||{}).nome||'')}</td><td class="num">${fmtMi(capexTotal(p))}</td></tr>`).join(''):'<tr><td colspan="6" class="muted">Não há projetos liberados para envio.</td></tr>'}</tbody></table></div></section>
+      <section class="panel"><h2>Retorno do PQQ</h2><p class="meta">O PQQ publica a decisão de cada projeto no Data Core; a Originação recebe em lote e concilia pelo ID mestre. ${hub?`Há <b>${pend.length}</b> retorno(s) aguardando recebimento.`:''}</p>${hub?'<div class="note">Recebimento automático: a Originação busca os retornos do plano a cada 2 minutos (e ao clicar em Sincronizar, no menu lateral).</div>':''}<div class="row"><button class="btn primary" id="importPqqHub" ${hub?'':'disabled'}>Receber retornos agora</button></div>
+      <details class="conting" ${hub?'':'open'}><summary>${hub?'Contingência: importar retorno por arquivo JSON':'Importar retorno por arquivo JSON'}</summary><div class="row" style="margin-top:8px"><input id="pqqReturnFile" type="file" accept="application/json,.json"><button class="btn" id="importPqqReturn">Importar arquivo JSON</button></div></details>
+      <details style="margin-top:14px"><summary>Formato do retorno (arquivo JSON)</summary><pre class="code">${esc(JSON.stringify({schema_version:'2.0',tipo:'plano_para_originacao',lote_id:'RET-AAAAMMDD-001',projetos:[{id_mestre:'ORI-000001',plano_id:'PPI-0001',ciclo_id:'c-2027',ciclo_inicio:2027,ciclo_fim:2031,status:'aprovado',orcamento_total:1000000,curva_mensal:{'2027-01':500000,'2027-02':500000},aprovado_por:'Comitê',aprovado_em:'2026-10-15',comentario:''}]},null,2))}</pre></details></section>
+      <section class="panel"><div class="row"><h2 style="margin:0">Projetos encaminhados à PMP</h2><span class="spacer"></span><button class="btn" id="exportPmpQueue" ${pmp.length?'':'disabled'}>Baixar pacote de integração</button></div><p class="meta">A aprovação do TAP publica projeto, curva aprovada e PDF no Data Core; a PMP inclui o projeto na carteira automaticamente. ${publicados} de ${pmp.length} já publicado(s).</p>
+      <div class="tablewrap"><table><thead><tr><th>ID mestre</th><th>Projeto</th><th>Unidade</th><th>Orçamento PQQ</th><th>Aprovação TAP</th><th>Publicação</th></tr></thead><tbody>${pmp.length?pmp.map(p=>`<tr><td>${esc(p.id)}</td><td>${esc(p.nome)}</td><td>${esc(p.unidade||'')}</td><td class="num">${fmtMi(((p.pqq||{}).retorno||{}).orcamento_total)}</td><td>${fmtDH((p.pmp||{}).aprovado_em)}</td><td>${(p.pmp||{}).status==='publicado'?'Publicado '+fmtDH((p.pmp||{}).publicado_em):'<span class="muted">Pendente</span>'}</td></tr>`).join(''):'<tr><td colspan="6" class="muted">Nenhum TAP aprovado.</td></tr>'}</tbody></table></div></section>
+      <section class="panel"><h2>Histórico de lotes PQQ</h2><div class="tablewrap"><table><thead><tr><th>Lote</th><th>Direção</th><th>Data</th><th>Itens</th><th>Situação</th></tr></thead><tbody>${lotes.length?lotes.map(l=>`<tr><td>${esc(l.id)}</td><td>${l.tipo==='PQQ_ENVIO'?'Originação → PQQ':'PQQ → Originação'}</td><td>${fmtDH(l.criado_em)}</td><td>${l.total}</td><td>${esc(l.status)}</td></tr>`).join(''):'<tr><td colspan="5" class="muted">Nenhum lote processado.</td></tr>'}</tbody></table></div></section>
+      </div>`;
+    const checkAll=$('#checkAllPqq');if(checkAll)checkAll.onchange=()=>document.querySelectorAll('[data-pqqsel]').forEach(x=>x.checked=checkAll.checked);
+    $('#sendPqqBatch').onclick=async()=>{
+      const ids=[...document.querySelectorAll('[data-pqqsel]:checked')].map(x=>x.dataset.pqqsel);
+      if(!ids.length){toast('Selecione ao menos um projeto.');return;}
+      try{const r=await api('POST','/api/integracoes/pqq/envios',{projeto_ids:ids});toast('Envio publicado no PQQ pelo hub · '+r.total+' projeto(s).');}
+      catch(e){toast(e.message||'Não foi possível enviar.');}
+      await carregar();viewIntegracoes();
+    };
+    $('#importPqqHub').onclick=async()=>{
+      try{const r=await api('POST','/api/integracoes/pqq/retornos/sincronizar');toast(r.lotes.length?'Retornos recebidos: '+r.importados+' projeto(s).':'Não há retornos do PQQ pendentes.');await carregar();viewIntegracoes();}
+      catch(e){toast(e.message||'Não foi possível receber os retornos.');}
+    };
+    $('#importPqqReturn').onclick=async()=>{
+      const file=$('#pqqReturnFile').files[0];if(!file){toast('Selecione o arquivo JSON de retorno do PQQ.');return;}
+      try{const data=JSON.parse(await file.text());const r=await api('POST','/api/integracoes/pqq/retornos',data);
+        toast(`Retorno processado: ${r.importados} de ${r.total_no_lote} projeto(s).`);await carregar();viewIntegracoes();
+      }catch(e){toast(e.message||'Arquivo inválido ou retorno não processado.');}
+    };
+    $('#exportPmpQueue').onclick=async()=>{const fila=await api('GET','/api/integracoes/pmp/fila?pdf=1');baixarBlob(new Blob([JSON.stringify({schema_version:'2.0',tipo:'originacao_para_pmp',gerado_em:nowIso(),projetos:fila.map(p=>({
+      id_mestre:p.id,nome:p.nome,unidade:p.unidade,area:p.diretoria,escopo_aprovado:(p.tap||{}).proposta?.escopo,
+      cronograma_aprovado:(p.tap||{}).proposta?.cronograma,orcamento_total_aprovado:((p.pqq||{}).retorno||{}).orcamento_total,
+      curva_mensal_aprovada:((p.pqq||{}).retorno||{}).curva_mensal,plano_id:((p.pqq||{}).retorno||{}).pqq_id,
+      plano_aprovado_por:((p.pqq||{}).retorno||{}).aprovado_por,plano_aprovado_em:((p.pqq||{}).retorno||{}).aprovado_em,
+      tap_aprovado_por:(p.pmp||{}).aprovado_por,tap_aprovado_em:(p.pmp||{}).aprovado_em,
+      event_id:(p.pmp||{}).event_id,idempotency_key:(p.pmp||{}).idempotency_key,
+      tap_documento_id:(p.pmp||{}).tap_documento_id,tap_pdf:(p.pmp||{}).tap_pdf
+    }))},null,2)],{type:'application/json'}),'fila-pmp-'+new Date().toISOString().slice(0,10)+'.json');};
+  }catch(e){m.innerHTML=`<h1>Integração PQQ / PMP</h1><div class="note bad">Não foi possível carregar as filas: ${esc(e.message)}</div>`;}
+}
+
+/* ============ Usuários e perfis (PMO) ============ */
+async function viewUsuarios(){
+  const m=$('#main');
+  if(!isPMO(USER)){m.innerHTML='<h1>Usuários</h1><div class="note">Área restrita ao PMO.</div>';return;}
+  const us=await api('GET','/api/usuarios');USERS=us;
+  const hub=!!(META&&META.modo==='hub');
+  const linhas=us.map(u=>`<tr><td>${esc(u.nome)}${u.origem==='demo'?' <span class="muted">(demo)</span>':''}</td><td>${esc(u.email||'')}</td>
+    <td><select data-perf="${esc(u.id)}">${Object.entries(PERFIL).map(([k,l])=>`<option value="${k}"${k===u.perfil?' selected':''}>${esc(l)}</option>`).join('')}</select></td>
+    <td><select data-uni="${esc(u.id)}"><option value="">Todas</option>${UNIDADES.map(x=>`<option${x===u.unidade?' selected':''}>${esc(x)}</option>`).join('')}</select></td>
+    <td><button class="btn" data-salvaru="${esc(u.id)}">Salvar</button></td></tr>`).join('');
+  m.innerHTML=`<h1>Usuários e perfis</h1><p class="lede">${hub?'O hub informa <b>quem</b> é cada pessoa (login único). Aqui o PMO define <b>o que</b> ela faz nesta ferramenta: perfil e unidade. Quem entra pela primeira vez recebe o perfil Solicitante (administradores do hub entram como PMO).':'Modo isolado: usuários de demonstração, um por perfil.'}</p>
+    <div class="tablewrap"><table><thead><tr><th>Nome</th><th>E-mail</th><th>Perfil</th><th>Unidade</th><th></th></tr></thead><tbody>${linhas}</tbody></table></div>`;
+  m.querySelectorAll('[data-salvaru]').forEach(b=>b.onclick=async()=>{const id=b.dataset.salvaru;
+    try{await api('PUT','/api/usuarios/'+encodeURIComponent(id),{perfil:m.querySelector(`[data-perf="${CSS.escape(id)}"]`).value,unidade:m.querySelector(`[data-uni="${CSS.escape(id)}"]`).value||null});toast('Perfil atualizado.');
+      if(SESSAO&&SESSAO.real&&SESSAO.real.id===id){await carregarSessao();}viewUsuarios();}catch(e){toast(e.message);}});
+}
+
+/* ============ Exemplo ============ */
+async function gerarExemplo(){
+  const y=new Date().getFullYear();
+  const iso=d=>d.toISOString().slice(0,10);
+  const add=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x;};
+  const hoje=new Date();
+  const c1={id:'c-'+(y+1),nome:`${V('plano_sigla')} ${y+1}–${y+5}`,abertura:iso(add(hoje,-75)),corte:iso(add(hoje,45)),inicio:y+1,fim:y+5};
+  const c2={id:'c-'+(y+2),nome:`${V('plano_sigla')} ${y+2}–${y+6}`,abertura:iso(add(hoje,290)),corte:iso(add(hoje,410)),inicio:y+2,fim:y+6};
+  await writeDoc('ciclos',c1);await writeDoc('ciclos',c2);
+  const unis=UNIDADES.slice(0,4);while(unis.length<4)unis.push(unis[unis.length-1]||'Unidade A');
+  const dem=USERS.filter(u=>u.origem==='demo');
+  const nomeDe=(perfil,un)=>((dem.find(u=>u.perfil===perfil&&(!un||u.unidade===un))||dem.find(u=>u.perfil===perfil)||{nome:'Usuário de demonstração'}).nome);
+  const pessoas=Object.fromEntries(unis.map(un=>{const u=dem.find(x=>x.perfil==='solicitante'&&x.unidade===un)||dem.find(x=>x.perfil==='solicitante')||{nome:'Solicitante',id:'u-demo-solic1'};return [un,[u.nome,u.id]];}));
+  const aprov={FSE:nomeDe('validador'),FSP:nomeDe('validador'),ELEG:nomeDe('pmo')};
+  const ar=k=>DIRETORIAS.includes(k)?k:(DIRETORIAS[0]||k);
+  const [A,B,C,D]=unis;
+  const L=[
+   ['Modernização do sistema de controle operacional',A,ar('Tecnologia'),'MADURO','aprovado',182000,c1],
+   ['Substituição de equipamentos de climatização',A,ar('Manutenção'),'FSP','em_validacao',46500,c1],
+   ['Reforma da oficina de manutenção',A,ar('Engenharia'),'BC','rascunho',38000,c1],
+   ['Retrofit da frota de veículos de apoio',B,ar('Engenharia'),'FSP','rascunho',265000,c1],
+   ['Nova subestação de energia',B,ar('Engenharia'),'ELEG','em_validacao',74000,c1],
+   ['Videomonitoramento analítico nas instalações',B,ar('Tecnologia'),'FSE','em_validacao',12000,c1],
+   ['Acessibilidade plena nos pontos de atendimento',B,ar('Engenharia'),'BC','devolvido',58000,c1],
+   ['Ampliação do pátio de estacionamento',C,ar('Engenharia'),'FSP','rascunho',120000,c2],
+   ['Automação do controle de acesso',C,ar('Tecnologia'),'FSE','rascunho',95000,c2],
+   ['Troca de cabos de média tensão',C,ar('Manutenção'),'MADURO','aprovado',33000,c1],
+   ['Recuperação emergencial de talude',D,ar('Engenharia'),'ELEG','rascunho',21000,c1],
+   ['Implantação de sistema de gestão da manutenção',D,ar('Tecnologia'),'FSE','rascunho',140000,c2],
+   ['Revitalização de ativos operacionais',D,ar('Manutenção'),'BC','em_validacao',67000,c2],
+   ['Pagamentos digitais no atendimento',A,ar('Tecnologia'),'FSP','rascunho',18500,c1]
+  ];
+  let n=maxLocalId();
+  for(const [nome,un,dir,est,st,cap,cic] of L){
+    n++;const id=await proximoId();
+    const [resp,sid]=pessoas[un];const idx=IDX[est];
+    const criado=add(hoje,-(60+idx*55+Math.floor(Math.random()*40)));
+    const gates={};GATES.forEach((g,i)=>{
+      if(i<idx)gates[g]={status:'aprovado',enviadoPor:resp,enviadoEm:add(criado,i*50+20).toISOString(),decididoPor:g==='BC'?nomeDe('gestor',un):aprov[g],decididoEm:add(criado,i*50+30).toISOString(),comentario:''};
+      else if(i===idx)gates[g]=st==='em_validacao'?{status:'em_validacao',enviadoPor:resp,enviadoEm:add(hoje,-4).toISOString()}:st==='devolvido'?{status:'devolvido',enviadoPor:resp,enviadoEm:add(hoje,-12).toISOString(),decididoPor:nomeDe('gestor',un),decididoEm:add(hoje,-6).toISOString(),comentario:'Detalhar alternativas avaliadas e o ganho esperado em disponibilidade.'}:{status:'rascunho'};
+      else gates[g]={status:'rascunho'};
+    });
+    const capexAno={};
+    if(idx>=1){const pesos=[.12,.26,.3,.2,.12];pesos.forEach((w,i)=>capexAno[cic.inicio+i]=Math.round(cap*w));}
+    const validacoes=[];
+    GATES.forEach(g=>{const s=gates[g];if(s.enviadoEm)validacoes.push({em:s.enviadoEm,por:s.enviadoPor,perfil:'Solicitante',gate:g,acao:'Enviado para validação',comentario:''});if(s.decididoEm)validacoes.push({em:s.decididoEm,por:s.decididoPor,perfil:g==='BC'?'Gestor da unidade':g==='ELEG'?'Administrador PMO':'Validador técnico',gate:g,acao:s.status==='aprovado'?'Aprovado':'Devolvido para ajuste',comentario:s.comentario||''});});
+    validacoes.sort((a,b)=>a.em.localeCompare(b.em));
+    const p={id,pep:idx>=3?'P-'+un.replace(/[^A-Za-z]/g,'').slice(0,2).toUpperCase()+'-'+(24000+n):'',nome,descricao:`Demanda da ${un} para ${nome.toLowerCase()}.`,unidade:un,diretoria:dir,responsavel:resp,solicitante:resp,solicitanteId:sid,
+      estagio:est,status:'Ativo',cicloId:cic.id,capexEstimado:Math.round(cap*0.9),capexAno,
+      fse:{area:un+' · '+dir,urgencia:nome.includes('emergencial')?'Crítica':'Média',problema:`Necessidade identificada pela ${dir.toLowerCase()} da ${un}: ${nome.toLowerCase()}.`,justificativa:'Impacto em disponibilidade operacional e atendimento contratual.',estimativa:'Ordem de grandeza por benchmark interno'},
+      bc:idx>=1?{objetivo:'Garantir confiabilidade e conformidade contratual.',escopo:'Escopo preliminar com fornecimento, instalação e comissionamento.',alternativas:'Manter e reparar; substituir parcialmente; substituir integralmente.',beneficios:'Redução de falhas e de custo de manutenção corretiva.',capexInicial:Math.round(cap*0.95),riscos:'Prazo de fornecimento e janelas operacionais.',prazo:'24 meses'}:{},
+      fsp:idx>=2&&!(est==='FSP'&&st==='rascunho'&&nome.includes('Retrofit'))?{escopo:'Escopo consolidado após estudos de engenharia.',cronograma:'Contratação em 6 meses; execução em 18 meses.',premissas:'Janelas noturnas; sem interrupção comercial.',riscos:'Interfaces com sistemas existentes.',docTecnica:'Estudo de viabilidade técnica rev. A'}:{},
+      gates,caminho:nome.includes('emergencial')?'extraordinario':'regular',
+      extra:nome.includes('emergencial')?{status:'solicitado',motivo:'Instabilidade identificada em inspeção de rotina.',justificativa:'Risco à operação antes do próximo ciclo orçamentário.',urgencia:'Crítica',capex:21000,solicitadoPor:resp}:null,
+      maturidadeManual:'',documentos:[{id:'d'+n,tipo:'FSE',nome:'FSE assinada',url:'https://example.com/fse-'+n+'.pdf',por:resp,em:criado.toISOString()}],
+      validacoes,hist:[{em:criado.toISOString(),por:resp,perfil:'Solicitante',acao:'Projeto criado',campo:'',de:'',para:nome}],
+      criadoEm:criado.toISOString(),atualizadoEm:add(hoje,-2).toISOString()};
+    if(st==='em_validacao'&&est==='ELEG'&&!p.cicloId)p.cicloId=c1.id;
+    await writeDoc('projetos',p);
+  }
+}
+
+/* ============ Inicialização ============ */
+$('#userSel').onchange=async e=>{const id=e.target.value;USER=(SESSAO&&SESSAO.real&&SESSAO.real.id===id)?SESSAO.real:(USERS.find(u=>u.id===id)||USER);S.editing=false;try{localStorage.setItem(UKEY,USER.id);}catch(x){}if(META&&META.modo==='hub'){try{await carregarSessao();}catch(x){}}render();};
+window.addEventListener('hashchange',()=>{if(S.editing&&!confirm('Há alterações não salvas. Sair mesmo assim?')){return;}S.editing=false;render();window.scrollTo(0,0);});
+async function boot(){
+  try{aplicarMeta(await api('GET','/api/meta'));}catch(e){}
+  ativarRotulos();
+  try{USERS=await api('GET','/api/usuarios');}catch(e){}
+  if(META&&META.modo==='hub'){
+    try{localStorage.removeItem(UKEY);}catch(e){}
+    try{await carregarSessao();}catch(e){$('#main').innerHTML=`<h1>Acesso pelo hub</h1><p class="lede">${esc(e.message)}</p>`;return;}
+  }else carregarUsuarioSalvo();
+  try{await carregar();S.mode='servidor';render();}
+  catch(e){$('#main').innerHTML=`<h1>Servidor indisponível</h1><p class="lede">Não foi possível ler a base local (${esc(e.message)}). Verifique se o servidor está rodando e recarregue a página.</p>`;return;}
+  setInterval(verificarAtualizacoes,4000);
+  window.addEventListener('strathub:notificacoes',e=>{S.notif=e.detail.pendentes;renderShell(((location.hash||'#/torre').slice(2).split('/')[0])||'torre');});
+  if(META&&META.modo==="hub"){sincronizarAgora(false);setInterval(()=>sincronizarAgora(),30000);}
+}
+boot();
+</script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+{
+  "_comentario": "Usado só quando a ferramenta roda SEM o hub. No hub, o perfil vem de Administração › Organização. Copie para organizacao.json.",
+  "nome": "Organização Exemplo",
+  "sigla": "ORG",
+  "cor_primaria": "#1e3a6e",
+  "unidades": [{"codigo": "UN-NORTE", "nome": "Unidade Norte", "grupo": "Regional A"}, {"codigo": "UN-SUL", "nome": "Unidade Sul", "grupo": "Regional A"}],
+  "areas": ["Engenharia", "Operações", "Tecnologia"],
+  "vocabulario": {"plano_sigla": "PPI", "codigo_erp": "Código ERP", "aprovador": "Aprovador Executivo"}
+}

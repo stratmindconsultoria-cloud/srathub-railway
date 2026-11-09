@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Exequibilidade — {{ rodada_atual }}</title>
+<script src="{{ hub_base }}/static/chart.umd.min.js"></script>
+{% include "_style2.html" %}
+</head>
+<body>
+{% include "_nav2.html" %}
+
+<div class="veredito {{ 'erro' if ex.veredito == 'inexequível' else ('alerta' if ex.veredito == 'apertado' else 'ok') }}">
+  <div class="eyebrow">Exequibilidade · {{ label_dim }} · {{ rodada_atual }}</div>
+  <div class="frase">{{ frase_ex }}</div>
+  <div class="sub">
+    <span>Mês de análise: <b>{{ ex.mes_analise or '—' }}</b></span>
+    <span>Meses restantes: <b>{{ ex.meses_restantes or '—' }}</b></span>
+    <span>Tendência de papel: <b>{{ ex.valor_papel | mi }}</b></span>
+  </div>
+</div>
+
+<div class="kpis">
+  <div class="kpi"><div class="label">Tendência {{ label_dim }} do ano</div><div class="value">{{ ex.tend | mi }}</div>
+    <div class="sub">realizado até aqui: {{ ex.real | mi }}</div></div>
+  <div class="kpi"><div class="label">Falta executar</div><div class="value">{{ ex.falta | mi }}</div>
+    <div class="sub">em {{ ex.meses_restantes or '—' }} mês(es)</div></div>
+  <div class="kpi warn"><div class="label">Ritmo necessário</div><div class="value">{{ ex.rr_necessario | mi }}</div>
+    <div class="sub">por mês, até dezembro</div></div>
+  <div class="kpi good"><div class="label">Ritmo realizado</div><div class="value">{{ ex.rr_recente | mi }}</div>
+    <div class="sub">média dos últimos 3 meses</div></div>
+  <div class="kpi {{ 'neg' if ex.razao and ex.razao > 3 else ('warn' if ex.razao and ex.razao > 2 else 'good') }}">
+    <div class="label">Razão necessário / atual</div>
+    <div class="value">{% if ex.razao %}{{ '%.1f' | format(ex.razao) }}×{% else %}—{% endif %}</div>
+    <div class="sub">{{ ex.veredito }}</div></div>
+</div>
+
+<div class="grid2">
+  <div class="panel">
+    <h2>O que a tendência exige do calendário restante</h2>
+    <div class="hint">Ritmo mensal realizado nos últimos meses contra o ritmo que a tendência declarada exige daqui até dezembro.</div>
+    <canvas id="chartRitmo" style="max-height:280px"></canvas>
+    <div class="legenda">Razão acima de 2× é sinal amarelo; acima de 3× a tendência declarada não cabe no calendário
+      e o que está em jogo não é o número, é a data.</div>
+  </div>
+  <div class="panel">
+    <h2>Cobertura de compromisso</h2>
+    <div class="hint">Tendência declarada contra o que já tem pedido fechado ou requisição aberta. O que não está comprometido não tem caminho para virar caixa no ano.</div>
+    <canvas id="chartComp" style="max-height:280px"></canvas>
+    <div class="legenda">{{ ex.n_papel }} projeto(s) somando {{ ex.valor_papel | mi }} declaram tendência sem nenhum compromisso e sem nenhum realizado.</div>
+  </div>
+</div>
+
+{% if ex.inexequiveis %}
+<div class="panel">
+  <h2>Projetos com tendência inexequível</h2>
+  <div class="hint">{{ ex.n_inexequiveis }} projeto(s) exigindo mais de 3× o próprio ritmo recente, somando {{ ex.valor_inexequivel | mi }} a executar.</div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>PEP</th><th>Projeto</th><th>Unidade</th><th class="num">Tendência</th><th class="num">Realizado</th>
+        <th class="num">Falta</th><th class="num">Ritmo atual</th><th class="num">Ritmo necessário</th><th class="num">Razão</th><th class="num">Compromisso</th></tr></thead>
+      <tbody>
+      {% for i in ex.inexequiveis %}
+        <tr>
+          <td><a href="{{ hub_base }}/tendencia/pep/{{ i.pep }}">{{ i.pep }}</a></td>
+          <td>{{ i.projeto }}</td><td>{{ i.unidade or '—' }}</td>
+          <td class="num">{{ i.tend | mi }}</td><td class="num">{{ i.real | mi }}</td>
+          <td class="num neg">{{ i.falta | mi }}</td>
+          <td class="num">{{ i.rr_recente | mi }}</td><td class="num">{{ i.rr_necessario | mi }}</td>
+          <td class="num neg">{{ '%.1f' | format(i.razao) }}×</td>
+          <td class="num">{% if i.cobertura_comp is not none %}{{ '%.0f' | format(i.cobertura_comp) }}%{% else %}—{% endif %}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+{% if ex.papel %}
+<div class="panel">
+  <h2>Tendência de papel</h2>
+  <div class="hint">Declaram tendência para o ano sem pedido, sem requisição e sem nada realizado. Ou já deveriam ter saído do ano, ou falta um passo que ninguém deu.</div>
+  <div class="tbl-wrap" style="max-height:400px">
+    <table>
+      <thead><tr><th>PEP</th><th>Projeto</th><th>Unidade</th><th>Vertical</th><th class="num">Tendência</th><th class="num">Sem compromisso</th></tr></thead>
+      <tbody>
+      {% for i in ex.papel %}
+        <tr><td><a href="{{ hub_base }}/tendencia/pep/{{ i.pep }}">{{ i.pep }}</a></td><td>{{ i.projeto }}</td>
+          <td>{{ i.unidade or '—' }}</td><td>{{ i.vertical_gestora or '—' }}</td>
+          <td class="num">{{ i.tend | mi }}</td><td class="num">{{ i.comp_sem | mi }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+{% if ex.descolados %}
+<div class="panel">
+  <h2>Descolamento físico × financeiro</h2>
+  <div class="hint">{{ ex.n_descolados }} projeto(s) com mais de 20 p.p. de diferença entre o avanço financeiro e o avanço físico oficial. Ou a medição física está desatualizada, ou o desembolso está adiantado em relação à entrega.</div>
+  <div class="tbl-wrap" style="max-height:400px">
+    <table>
+      <thead><tr><th>PEP</th><th>Projeto</th><th>Unidade</th><th class="num">Avanço financeiro</th><th class="num">Avanço físico</th><th class="num">Gap</th><th>Leitura</th></tr></thead>
+      <tbody>
+      {% for d in ex.descolados %}
+        <tr><td><a href="{{ hub_base }}/tendencia/pep/{{ d.pep }}">{{ d.pep }}</a></td><td>{{ d.projeto }}</td><td>{{ d.unidade or '—' }}</td>
+          <td class="num">{{ '%.0f' | format(d.avanco_fin) }}%</td>
+          <td class="num">{{ '%.0f' | format(d.avanco_fis) }}%</td>
+          <td class="num {{ 'neg' if d.gap > 0 else 'warn' }}">{{ '%+.0f' | format(d.gap) }} p.p.</td>
+          <td>{{ d.sentido }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+{% include "_insights.html" %}
+
+<script>
+const E = {{ ex_json | safe }};
+new Chart(document.getElementById('chartRitmo'), {
+  type:'bar',
+  data:{labels:['Ritmo realizado (3m)','Ritmo necessário'],
+    datasets:[{data:[E.rr_recente, E.rr_necessario], backgroundColor:['{{ cor2 }}','#B45309'], borderRadius:6}]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},
+    tooltip:{callbacks:{label:c=>(c.raw/1e6).toFixed(1).replace('.',',')+' Mi/mês'}}},
+    scales:{y:{ticks:{callback:v=>(v/1e6).toFixed(0)+' Mi'}}}}
+});
+new Chart(document.getElementById('chartComp'), {
+  type:'bar',
+  data:{labels:['Tendência {{ rodada_atual }}'],
+    datasets:[
+      {label:'Pedido fechado', data:[E.comp_ped], backgroundColor:'{{ cor2 }}'},
+      {label:'Requisição aberta', data:[E.comp_req], backgroundColor:'#2563EB'},
+      {label:'Sem compromisso', data:[E.descoberto], backgroundColor:'#B91C1C'}]},
+  options:{indexAxis:'y', responsive:true, maintainAspectRatio:false,
+    scales:{x:{stacked:true, ticks:{callback:v=>(v/1e6).toFixed(0)+' Mi'}}, y:{stacked:true}},
+    plugins:{tooltip:{callbacks:{label:c=>c.dataset.label+': '+(c.raw/1e6).toFixed(1).replace('.',',')+' Mi'}}}}
+});
+</script>
+<div class="footer">/// {{ org_sigla|lower }} · análise comparativa de tendências</div>
+</body>
+</html>

@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Trajetória — {{ rodada_atual }}</title>
+<script src="{{ hub_base }}/static/chart.umd.min.js"></script>
+{% include "_style2.html" %}
+</head>
+<body>
+{% include "_nav2.html" %}
+
+<div class="veredito {{ vd.status }}">
+  <div class="eyebrow">Trajetória · {{ label_dim }}</div>
+  <div class="frase">{{ frase_trajetoria }}</div>
+  <div class="sub"><span>Rodadas na base: <b>{{ vintage.linhas | length }}</b></span>
+    <span>Corte de materialidade: <b>{{ corte | mi }}</b></span></div>
+</div>
+
+<div class="panel">
+  <h2>Matriz rodada × ano — o que cada rodada dizia sobre cada ano</h2>
+  <div class="hint">
+    Ler uma <b>linha</b> é a visão de mundo de uma rodada. Ler uma <b>coluna</b> é como a opinião sobre o mesmo ano foi
+    mudando — que é a leitura que a comparação par a par não enxerga. O número menor é a variação contra a rodada anterior.
+    {% if not vintage.plurianual %}<br><b>Sem colunas plurianuais nas rodadas carregadas:</b> só o ano da rodada tem leitura vertical.{% endif %}
+  </div>
+  <div class="tbl-wrap" style="max-height:none">
+    <table class="vintage">
+      <thead><tr><th>Rodada</th><th>Mês</th>{% for a in vintage.anos %}<th>{{ a }}</th>{% endfor %}<th>Total QQ</th><th>Realizado acum.</th></tr></thead>
+      <tbody>
+      {% for l in vintage.linhas %}
+        <tr>
+          <td class="rot">{{ l.rodada }}</td>
+          <td style="font-size:11px;color:var(--muted)">{{ l.mes_analise or '—' }}</td>
+          {% for a in vintage.anos %}
+            {% set d = l.delta_anos.get(a) %}
+            <td>
+              <span class="cell" style="background:{{ heat(d) }}">
+                {{ l.anos[a] | mi }}
+                {% if d %}<span class="d {{ 'neg' if d < 0 else 'pos' }}">{{ d | mi }}</span>{% endif %}
+              </span>
+            </td>
+          {% endfor %}
+          <td class="num">{{ l.total | mi }}</td>
+          <td class="num">{{ l.real_acum | mi }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr><td class="rot" colspan="2">Leitura da coluna</td>
+        {% for a in vintage.anos %}
+          {% set c = vintage.colunas[a] %}
+          <td style="font-size:11px;line-height:1.4">
+            <b>{{ c.direcao }}</b><br>{{ c.delta_total | mi }}
+            {% if c.n_reversoes %}<br><span class="warn">{{ c.n_reversoes }} reversão(ões)</span>{% endif %}
+          </td>
+        {% endfor %}
+        <td colspan="2"></td></tr>
+      </tfoot>
+    </table>
+  </div>
+</div>
+
+<div class="grid2">
+  <div class="panel">
+    <h2>Tendência do ano corrente ao longo das rodadas</h2>
+    <div class="hint">Orçado, tendência declarada e realizado acumulado em cada rodada.</div>
+    <canvas id="chartSerie" style="max-height:300px"></canvas>
+  </div>
+  <div class="panel">
+    <h2>Padrões de comportamento</h2>
+    {% if not padroes.suficiente %}
+      <div class="hint">São necessárias pelo menos 3 rodadas para classificar padrão — há {{ padroes.n_rodadas }} na base.</div>
+    {% else %}
+      <div class="hint">Classificação de cada projeto pela forma da série, não pelo delta da última comparação.</div>
+      <table>
+        <thead><tr><th>Padrão</th><th class="num">Projetos</th><th class="num">Δ líquido</th></tr></thead>
+        <tbody>
+        {% for k, r in padroes.resumo.items() %}
+          <tr><td>{{ r.label }}</td><td class="num">{{ r.n }}</td>
+              <td class="num {{ 'neg' if r.valor < 0 else 'pos' }}">{{ r.valor | mi }}</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      <div class="legenda">
+        <b>Serrote</b> é o achado que a comparação par a par perde: o projeto oscila entre rodadas e volta perto do ponto
+        de partida, então o delta da última comparação é pequeno — mas o comportamento é o mais problemático da lista.
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+{% if padroes.suficiente and padroes.itens %}
+<div class="panel">
+  <h2>Projetos por padrão de trajetória</h2>
+  <div class="hint">{{ padroes.total_itens }} projeto(s) com movimento acima do corte ao longo de {{ padroes.n_rodadas }} rodadas. Ordenados por relevância analítica, não por delta.</div>
+  <div class="controls">
+    <input type="text" id="buscaP" placeholder="Buscar PEP, projeto, unidade...">
+    <select id="fPadrao">
+      <option value="">Todos os padrões</option>
+      {% for k, r in padroes.resumo.items() %}<option value="{{ k }}">{{ r.label }}</option>{% endfor %}
+    </select>
+    <span style="font-size:12px;color:var(--muted)" id="contadorP"></span>
+  </div>
+  <div class="tbl-wrap">
+    <table id="tblPad">
+      <thead><tr>
+        <th>PEP</th><th>Projeto</th><th>Unidade</th><th>Padrão</th><th>Série ({{ padroes.rodadas | join(' · ') }})</th>
+        <th class="num">Δ líquido</th><th class="num">Caminho percorrido</th><th class="num">Reversões</th>
+      </tr></thead>
+      <tbody>
+      {% for i in padroes.itens %}
+        <tr data-padrao="{{ i.padrao }}" data-busca="{{ (i.pep ~ ' ' ~ i.projeto ~ ' ' ~ (i.unidade or '')) | lower }}">
+          <td><a href="{{ hub_base }}/tendencia/pep/{{ i.pep }}">{{ i.pep }}</a></td>
+          <td>{{ i.projeto }}</td>
+          <td>{{ i.unidade or '—' }}</td>
+          <td><span class="badge {{ 'b-alerta' if i.padrao in ('serrote','erosao') else 'b-info' }}">{{ i.padrao_label.split(' —')[0] }}</span></td>
+          <td>{{ spark(i.serie) | safe }}</td>
+          <td class="num {{ 'neg' if i.liquido < 0 else 'pos' }}">{{ i.liquido | mi }}</td>
+          <td class="num">{{ i.caminho | mi }}</td>
+          <td class="num">{{ i.reversoes }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+{% if cred.suficiente %}
+<div class="panel">
+  <h2>Credibilidade do previsor — por {{ cred.campo_label }}</h2>
+  <div class="hint">
+    Como as tendências declaradas por cada {{ cred.campo_label | lower }} se comportaram ao longo de {{ cred.n_rodadas }} rodadas.
+    Viés é a direção em que as revisões acontecem; volatilidade é o caminho percorrido dividido pelo deslocamento líquido —
+    quanto maior, mais a tendência foi negociada em vez de construída.
+  </div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr>
+        <th>{{ cred.campo_label }}</th><th>Série</th><th class="num">Tendência atual</th>
+        <th class="num">Δ líquido</th><th class="num">Caminho</th><th class="num">Revisão média</th>
+        <th>Viés</th><th class="num">Volatilidade</th><th class="num">Reversões</th>
+      </tr></thead>
+      <tbody>
+      {% for i in cred.itens %}
+        <tr>
+          <td><b>{{ i.chave }}</b></td>
+          <td>{{ spark(i.serie) | safe }}</td>
+          <td class="num">{{ i.atual | mi }}</td>
+          <td class="num {{ 'neg' if i.liquido < 0 else 'pos' }}">{{ i.liquido | mi }}</td>
+          <td class="num">{{ i.caminho | mi }}</td>
+          <td class="num">{% if i.revisao_media_pct is not none %}{{ '%+.1f' | format(i.revisao_media_pct) }}%{% else %}—{% endif %}</td>
+          <td><span class="badge {{ 'b-alerta' if i.vies != 'equilibrado' else 'b-ok' }}">{{ i.vies }}</span></td>
+          <td class="num">{% if i.volatilidade %}{{ '%.1f' | format(i.volatilidade) }}×{% else %}—{% endif %}</td>
+          <td class="num">{{ i.n_reversoes }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+{% include "_insights.html" %}
+
+<script>
+const S = {{ serie_json | safe }};
+new Chart(document.getElementById('chartSerie'), {
+  type:'line',
+  data:{labels:S.labels, datasets:[
+    {label:'Orçado', data:S.orc, borderColor:'{{ cor1 }}', backgroundColor:'{{ cor1 }}22', tension:.25},
+    {label:'Tendência', data:S.tend, borderColor:'#B45309', backgroundColor:'#B4530922', tension:.25},
+    {label:'Realizado acum.', data:S.real, borderColor:'{{ cor2 }}', backgroundColor:'{{ cor2 }}22', tension:.25}
+  ]},
+  options:{responsive:true,maintainAspectRatio:false,
+    plugins:{tooltip:{callbacks:{label:c=>c.dataset.label+': '+(c.raw/1e6).toFixed(1).replace('.',',')+' Mi'}}},
+    scales:{y:{ticks:{callback:v=>(v/1e6).toFixed(0)+' Mi'}}}}
+});
+(function(){
+  const linhas = Array.from(document.querySelectorAll('#tblPad tbody tr'));
+  if(!linhas.length) return;
+  const cont = document.getElementById('contadorP');
+  let fp='', fb='';
+  function aplicar(){
+    let n=0;
+    linhas.forEach(tr=>{
+      const ok=(!fp||tr.dataset.padrao===fp)&&(!fb||tr.dataset.busca.includes(fb));
+      tr.style.display=ok?'':'none'; if(ok)n++;
+    });
+    cont.textContent = n+' de '+linhas.length+' projetos';
+  }
+  document.getElementById('fPadrao').addEventListener('change',e=>{fp=e.target.value;aplicar();});
+  document.getElementById('buscaP').addEventListener('input',e=>{fb=e.target.value.toLowerCase();aplicar();});
+  aplicar();
+})();
+</script>
+<div class="footer">/// {{ org_sigla|lower }} · análise comparativa de tendências</div>
+</body>
+</html>

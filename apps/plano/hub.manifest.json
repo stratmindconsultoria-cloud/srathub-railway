@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.0",
+  "id": "plano",
+  "name": "Plano de Investimentos",
+  "version": "1.2.2",
+  "description": "Ciclo de planejamento plurianual do portfólio: base imutável, pleitos com justificativa, cenários de comitê, aprovação e publicação; risco de execução por Monte Carlo.",
+  "runtime": {
+    "mode": "service",
+    "port": 8820,
+    "start_command": [
+      "python",
+      "-m",
+      "uvicorn",
+      "app:app",
+      "--host",
+      "127.0.0.1",
+      "--port",
+      "8820",
+      "--root-path",
+      "/apps/plano"
+    ],
+    "health": {
+      "type": "http",
+      "path": "/health"
+    }
+  },
+  "portal": {
+    "default_visible": true,
+    "icon": "📊",
+    "category": "Ciclo de vida do projeto"
+  },
+  "auth_mode": "hub",
+  "dependencies": [
+    "hub_data_core"
+  ],
+  "strathub": {
+    "ocioso_min": 60,
+    "sempre_ligado": false
+  },
+  "contracts": {
+    "publishes": [
+      "portfolio/retorno_originacao",
+      "pmp/plano_aprovado",
+      "agenda/pendencia"
+    ],
+    "consumes": [
+      "portfolio/entrada_originacao",
+      "portfolio/execucao"
+    ]
+  }
+}

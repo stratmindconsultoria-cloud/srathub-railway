@@ -1,0 +1,50 @@
+{
+  "schema_version": "1.0",
+  "id": "conector_crm",
+  "name": "Conector CRM",
+  "version": "1.1.2",
+  "description": "Integração genérica com CRMs: recebe solicitações de serviço (webhook, busca periódica ou arquivo) num formato neutro e devolve o status das OS. Não é um CRM.",
+  "runtime": {
+    "mode": "service",
+    "port": 8860,
+    "start_command": [
+      "python",
+      "-m",
+      "uvicorn",
+      "app:app",
+      "--host",
+      "127.0.0.1",
+      "--port",
+      "8860",
+      "--root-path",
+      "/apps/conector_crm"
+    ],
+    "health": {
+      "type": "http",
+      "path": "/health"
+    }
+  },
+  "portal": {
+    "default_visible": true,
+    "icon": "🔌",
+    "category": "Serviços"
+  },
+  "auth_mode": "hub",
+  "dependencies": [
+    "hub_data_core"
+  ],
+  "strathub": {
+    "sempre_ligado": false,
+    "ocioso_min": 60,
+    "rotas_publicas": []
+  },
+  "contracts": {
+    "publishes": [
+      "servicos/solicitacao_externa",
+      "agenda/pendencia"
+    ],
+    "consumes": [
+      "servicos/status_os"
+    ]
+  }
+}

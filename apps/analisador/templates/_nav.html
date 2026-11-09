@@ -1,0 +1,80 @@
+  <div class="topbar">
+    <div class="topbar-row">
+      <h1>Painel de Tendência — {{ org_sigla }} · PMO</h1>
+      <a class="back" href="{{ hub_base }}/">← rodadas</a>
+    </div>
+    <div class="tabs">
+      <a href="{{ hub_base }}/tendencia/geral?rodada={{ rodada_atual }}&comparar={{ rodada_comparada or '' }}{{ qs_filtro }}" class="{{ 'active' if aba=='geral' }}">Geral</a>
+      <a href="{{ hub_base }}/tendencia/fisico?rodada={{ rodada_atual }}&comparar={{ rodada_comparada or '' }}{{ qs_filtro }}" class="{{ 'active' if aba=='fisico' }}">Físico</a>
+      <a href="{{ hub_base }}/tendencia/economico?rodada={{ rodada_atual }}&comparar={{ rodada_comparada or '' }}{{ qs_filtro }}" class="{{ 'active' if aba=='econ' }}">Econômico</a>
+      <a href="{{ hub_base }}/tendencia/financeiro?rodada={{ rodada_atual }}&comparar={{ rodada_comparada or '' }}{{ qs_filtro }}" class="{{ 'active' if aba=='fin' }}">Financeiro</a>
+    </div>
+    <form class="toolbar" method="get" id="form-tendencia">
+      <label>Rodada:</label>
+      <select name="rodada" onchange="this.form.submit()">
+        {% for r in rodadas %}<option value="{{ r.rodada }}" {{ 'selected' if r.rodada==rodada_atual }}>{{ r.rodada }} ({{ r.status }})</option>{% endfor %}
+      </select>
+      <label>Comparar com:</label>
+      <select name="comparar" onchange="this.form.submit()">
+        <option value="">rodada anterior (auto)</option>
+        {% for r in rodadas %}{% if r.rodada != rodada_atual %}<option value="{{ r.rodada }}" {{ 'selected' if r.rodada==rodada_comparada }}>{{ r.rodada }}</option>{% endif %}{% endfor %}
+      </select>
+      {% if categorias_disponiveis is defined %}
+        <label>Categoria:</label>
+        <select name="categoria" onchange="this.form.submit()">
+          {% for k, v in categorias_disponiveis.items() %}
+            <option value="{{ k }}" {{ 'selected' if k==categoria }}>{{ v }}</option>
+          {% endfor %}
+        </select>
+      {% endif %}
+      <input type="hidden" name="filtro_campo" id="filtro_campo_hidden" value="{{ filtro_campo }}">
+      <input type="hidden" name="filtro_valores" id="filtro_valores_hidden" value="{{ filtro_valores_raw }}">
+    </form>
+
+    <div class="filtro-dinamico">
+      <div class="filtro-linha">
+        <label>Filtrar/agrupar por:</label>
+        <select id="filtro-dim-select">
+          <option value="">— nenhum —</option>
+          {% for campo, label in filtro_campos.items() %}
+            <option value="{{ campo }}" {{ 'selected' if campo==filtro_campo }}>{{ label }}</option>
+          {% endfor %}
+        </select>
+        {% if filtro_ativo %}
+          <span class="filtro-badge">{{ filtro_selecionados|length }} selecionado(s) em {{ filtro_campos.get(filtro_campo, filtro_campo) }}</span>
+          <a href="?rodada={{ rodada_atual }}&comparar={{ rodada_comparada or '' }}{% if categoria is defined %}&categoria={{ categoria }}{% endif %}" class="filtro-limpar">limpar filtro</a>
+        {% endif %}
+      </div>
+      {% if filtro_campo and filtro_opcoes %}
+      <div class="filtro-opcoes" id="filtro-opcoes-box">
+        {% for opcao in filtro_opcoes %}
+          <label class="filtro-chk"><input type="checkbox" value="{{ opcao }}" {{ 'checked' if opcao in filtro_selecionados }}> {{ opcao }}</label>
+        {% endfor %}
+        <button type="button" id="filtro-aplicar-btn">Aplicar filtro</button>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  <script>
+    (function(){
+      const form = document.getElementById('form-tendencia');
+      const dimSelect = document.getElementById('filtro-dim-select');
+      const campoHidden = document.getElementById('filtro_campo_hidden');
+      const valoresHidden = document.getElementById('filtro_valores_hidden');
+      if(dimSelect){
+        dimSelect.addEventListener('change', function(){
+          campoHidden.value = this.value;
+          valoresHidden.value = '';  // trocar de dimensão limpa a seleção anterior
+          form.submit();
+        });
+      }
+      const btn = document.getElementById('filtro-aplicar-btn');
+      if(btn){
+        btn.addEventListener('click', function(){
+          const marcados = Array.from(document.querySelectorAll('#filtro-opcoes-box input[type=checkbox]:checked')).map(c => c.value);
+          valoresHidden.value = marcados.join('|');
+          form.submit();
+        });
+      }
+    })();
+  </script>

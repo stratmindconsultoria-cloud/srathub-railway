@@ -1,0 +1,12 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Calculadora de horas</title><link rel="stylesheet" href="/hub-static/hub.css"></head>
+<body><main style="max-width:480px;margin:40px auto;padding:0 16px">
+<h2>🧮 Calculadora de horas</h2><p style="color:var(--text2);margin:6px 0 18px">Some intervalos no formato 08:30-12:00 (um por linha).</p>
+<textarea id="t" class="campo" rows="6">08:30-12:00
+13:00-18:15</textarea>
+<p style="margin-top:14px;font-size:20px;font-weight:600" id="r"></p></main>
+<script>
+const calc = () => { let m = 0; for (const l of t.value.split('\n')) { const x = l.match(/(\d{1,2}):(\d{2})\s*-\s*(\d{1,2}):(\d{2})/); if (x) m += (x[3]*60 + +x[4]) - (x[1]*60 + +x[2]) }
+  r.textContent = `Total: ${Math.floor(m/60)}h${String(m%60).padStart(2,'0')}` }
+t.oninput = calc; calc()
+</script></body></html>
